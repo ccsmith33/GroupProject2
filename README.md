@@ -96,6 +96,121 @@ php -S localhost:3000
 
 Then open `http://localhost:3000` in your browser.
 
+## Testing
+
+This project includes comprehensive unit testing for both backend and frontend components.
+
+**Important:** The main API is built with **.NET 8** and runs with `dotnet run`. Node.js is only used for frontend testing tools and development utilities.
+
+### Backend Testing (.NET)
+
+**Run all backend tests:**
+
+```bash
+cd api.Tests
+dotnet test
+```
+
+**Run tests with detailed output:**
+
+```bash
+cd api.Tests
+dotnet test --verbosity normal
+```
+
+**Run specific test class:**
+
+```bash
+cd api.Tests
+dotnet test --filter "ProgramTests"
+```
+
+**Run tests and generate coverage report:**
+
+```bash
+cd api.Tests
+dotnet test --collect:"XPlat Code Coverage"
+```
+
+### Frontend Testing (JavaScript)
+
+**Option 1: Browser-based test runner (Recommended)**
+
+```bash
+cd client
+# Open tests/test-runner.html in your web browser
+# Or use the npm script:
+npm run test
+```
+
+**Option 2: Node.js testing (Advanced)**
+
+```bash
+cd client
+# Install testing dependencies
+npm install --save-dev jest
+
+# Run tests with Jest
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+**Option 3: Manual test execution**
+
+1. Open `client/tests/test-runner.html` in your browser
+2. View test results in the browser
+3. Check console for any errors
+
+**Add new frontend tests:**
+
+1. Create `*.test.js` files in `client/tests/` folder
+2. Follow the existing test patterns in `app.test.js`
+3. Include your test file in `test-runner.html`
+
+### Test Structure
+
+**Backend Tests (`api.Tests/`):**
+
+- `ProgramTests.cs` - API endpoint tests
+- Uses xUnit framework
+- Tests API controllers, business logic, and data validation
+
+**Frontend Tests (`client/tests/`):**
+
+- `app.test.js` - JavaScript function tests
+- `test-runner.html` - Test execution environment
+- Tests DOM manipulation, API calls, and utility functions
+
+### Writing Tests
+
+**Backend Test Example:**
+
+```csharp
+[Fact]
+public async Task GetProjects_ReturnsSuccessStatusCode()
+{
+    // Arrange
+    var request = "/api/projects";
+
+    // Act
+    var response = await _client.GetAsync(request);
+
+    // Assert
+    response.EnsureSuccessStatusCode();
+}
+```
+
+**Frontend Test Example:**
+
+```javascript
+test("App constructor initializes correctly", () => {
+  const app = new App();
+  expect(app.apiBaseUrl).toBe("https://localhost:7000/api");
+});
+```
+
 ## Features
 
 ### Current Implementation

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Runner</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-pass { color: green; }
+        .test-fail { color: red; }
+        .test-summary { margin-top: 20px; padding: 10px; background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <h1>Frontend Test Runner</h1>
+    <div id="test-results"></div>
+    <div id="test-summary" class="test-summary"></div>
+
+    <script>
+        // Simple test framework for vanilla JavaScript
+        class TestRunner {
+            constructor() {
+                this.tests = [];
+                this.passed = 0;
+                this.failed = 0;
+            }
+
+            test(name, fn) {
+                this.tests.push({ name, fn });
+            }
+
+            async run() {
+                const results = document.getElementById('test-results');
+                const summary = document.getElementById('test-summary');
+
+                for (const test of this.tests) {
+                    try {
+                        await test.fn();
+                        results.innerHTML += `<div class="test-pass">✅ ${test.name}</div>`;
+                        this.passed++;
+                    } catch (error) {
+                        results.innerHTML += `<div class="test-fail">❌ ${test.name}: ${error.message}</div>`;
+                        this.failed++;
+                    }
+                }
+
+                summary.innerHTML = `
+                    <strong>Test Summary:</strong><br>
+                    Passed: ${this.passed}<br>
+                    Failed: ${this.failed}<br>
+                    Total: ${this.tests.length}
+                `;
+            }
+        }
+
+        // Global test functions
+        window.test = (name, fn) => testRunner.test(name, fn);
+        window.expect = (actual) => ({
+            toBe: (expected) => {
+                if (actual !== expected) {
+                    throw new Error(`Expected ${expected}, but got ${actual}`);
+                }
+            },
+            toEqual: (expected) => {
+                if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+                    throw new Error(`Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(actual)}`);
+                }
+            },
+            toThrow: () => {
+                try {
+                    actual();
+                    throw new Error('Expected function to throw, but it did not');
+                } catch (error) {
+                    // Function threw as expected
+                }
+            }
+        });
+
+        const testRunner = new TestRunner();
+
+        // Load and run tests
+        document.addEventListener('DOMContentLoaded', () => {
+            testRunner.run();
+        });
+    </script>
+
+    <!-- Load test files here -->
+    <script src="app.test.js"></script>
+</body>
+</html>

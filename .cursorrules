@@ -245,6 +245,38 @@
 - **ALWAYS create small, focused changes** (one feature per commit)
 - **NEVER commit broken or incomplete code**
 
+### Unit Testing Guidelines
+
+- **ALWAYS write unit tests** for new business logic and API endpoints
+- **ALWAYS test edge cases** including null values, empty inputs, and error conditions
+- **ALWAYS use descriptive test names** that explain what is being tested
+- **ALWAYS follow AAA pattern** (Arrange, Act, Assert) in test methods
+- **ALWAYS mock external dependencies** (database, APIs) in unit tests
+- **ALWAYS ensure tests are independent** and can run in any order
+- **ALWAYS run tests locally** before committing changes
+- **NEVER commit code** without corresponding unit tests for new functionality
+
+#### Backend Testing Requirements
+
+- **API Controllers**: Test all endpoints with valid and invalid inputs
+- **Business Logic**: Test all service methods with various scenarios
+- **Data Validation**: Test input validation and error handling
+- **Database Operations**: Mock database calls and test data transformations
+
+#### Frontend Testing Requirements
+
+- **JavaScript Functions**: Test all utility functions and business logic
+- **API Integration**: Test API calls with mock responses
+- **DOM Manipulation**: Test UI updates and user interactions
+- **Error Handling**: Test error scenarios and user feedback
+
+#### Test File Organization
+
+- **Backend**: Create `*Tests.cs` files in `api.Tests` project
+- **Frontend**: Create `*.test.js` files in `client/tests` folder
+- **Naming**: Use descriptive names like `UserServiceTests.cs` or `apiClient.test.js`
+- **Structure**: Group related tests in the same file, separate by functionality
+
 ### Cursor AI Behavior
 
 - **BEFORE making changes**: Ask "Explain this code and suggest safe improvements"

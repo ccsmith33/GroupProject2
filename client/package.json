@@ -1,0 +1,19 @@
+{
+  "name": "mis-321-group-project-2-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for AIS Innovation Challenge Project",
+  "scripts": {
+    "test": "open tests/test-runner.html",
+    "test:headless": "echo 'Run tests by opening tests/test-runner.html in browser'",
+    "serve": "python -m http.server 3000 || npx http-server -p 3000 || php -S localhost:3000"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "ais",
+    "innovation",
+    "challenge",
+    "frontend"
+  ],
+  "author": "MIS 321 Group Project 2 Team",
+  "license": "MIT"
+}
