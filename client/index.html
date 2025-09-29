@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIS 321 Group Project 2</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="styles/main.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="#">MIS 321 Project</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#" data-page="home">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="projects">Projects</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" data-page="about">About</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container mt-4">
+            <!-- Home Page -->
+            <div id="home-page" class="page">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="jumbotron bg-light p-5 rounded">
+                            <h1 class="display-4">Welcome to MIS 321 Group Project 2</h1>
+                            <p class="lead">Building innovative solutions for the AIS Innovation Challenge</p>
+                            <hr class="my-4">
+                            <p>This project focuses on addressing one of the United Nations Sustainable Development Goals through innovative information systems solutions.</p>
+                            <a class="btn btn-primary btn-lg" href="#" data-page="projects" role="button">View Projects</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SDG Goals Overview -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <h2>UN Sustainable Development Goals</h2>
+                        <p>Our project addresses one of these critical global challenges:</p>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">No Poverty</h5>
+                                        <p class="card-text">End poverty in all its forms everywhere</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Quality Education</h5>
+                                        <p class="card-text">Ensure inclusive and equitable quality education</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Climate Action</h5>
+                                        <p class="card-text">Take urgent action to combat climate change</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div id="projects-page" class="page" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Project Management</h2>
+                        <p>Manage your innovation challenge projects here.</p>
+                    </div>
+                </div>
+
+                <!-- Add Project Form -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Add New Project</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="project-form">
+                                    <div class="mb-3">
+                                        <label for="project-name" class="form-label">Project Name</label>
+                                        <input type="text" class="form-control" id="project-name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="project-description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="project-description" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Add Project</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects List -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Current Projects</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="projects-list">
+                                    <div class="text-center">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Page -->
+            <div id="about-page" class="page" style="display: none;">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>About This Project</h2>
+                        <p>This project is being developed for the AIS Student Chapters Technology Innovation Challenge.</p>
+                        
+                        <h3>Project Goals</h3>
+                        <ul>
+                            <li>Address a real-world problem using information systems</li>
+                            <li>Demonstrate innovation and creativity</li>
+                            <li>Show potential for societal impact</li>
+                            <li>Implement a working prototype</li>
+                        </ul>
+
+                        <h3>Technology Stack</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Frontend</h5>
+                                <ul>
+                                    <li>HTML5 & CSS3</li>
+                                    <li>Vanilla JavaScript (ES6+)</li>
+                                    <li>Bootstrap 5</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Backend</h5>
+                                <ul>
+                                    <li>.NET 8 Web API</li>
+                                    <li>C#</li>
+                                    <li>SQLite Database</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-light mt-5 py-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <p>&copy; 2025 MIS 321 Group Project 2. Built for AIS Innovation Challenge.</p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="scripts/app.js"></script>
+</body>
+</html>
