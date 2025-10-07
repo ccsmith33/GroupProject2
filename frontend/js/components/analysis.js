@@ -18,12 +18,12 @@ class Analysis {
           <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
               <h5>Analysis Results</h5>
-              <span id="analysisScore" class="badge bg-success fs-6"></span>
+              <span id="analysisScore" class="badge fs-6"></span>
             </div>
             <div class="card-body">
               <!-- Loading State -->
               <div id="analysisLoading" class="text-center">
-                <div class="spinner-border text-primary" role="status">
+                <div class="spinner-border" role="status">
                   <span class="visually-hidden">Analyzing...</span>
                 </div>
                 <p class="mt-2">AI is analyzing your materials...</p>
