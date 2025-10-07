@@ -1,26 +1,95 @@
-// Import dependencies
-import AnalysisAPI from "../api/analysis.js";
-
 // File upload component functionality
 class FileUpload {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.uploadedFiles = [];
     this.maxFileSize = 10 * 1024 * 1024; // 10MB
     this.allowedTypes = [
       ".pdf",
-      ".docx",
+      ".docx", 
       ".pptx",
       ".txt",
       ".jpg",
       ".jpeg",
       ".png",
     ];
+    this.eventListeners = {};
     this.init();
   }
 
   init() {
+    this.render();
     this.setupEventListeners();
     this.setupDragAndDrop();
+  }
+
+  render() {
+    this.container.innerHTML = `
+      <div class="row mt-4">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5>Upload Study Materials</h5>
+            </div>
+            <div class="card-body">
+              <div id="fileUploadArea" class="upload-area">
+                <div class="upload-content">
+                  <i class="fas fa-cloud-upload-alt fa-3x text-muted"></i>
+                  <p>Drag and drop files here or click to browse</p>
+                  <p class="text-muted small">Supports PDF, Word, PowerPoint, images, and text files</p>
+                </div>
+                <input type="file" id="fileInput" multiple accept=".pdf,.docx,.pptx,.txt,.jpg,.jpeg,.png" style="display: none;">
+              </div>
+              
+              <!-- Upload Progress -->
+              <div id="uploadProgress" class="mt-3" style="display: none;">
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <small class="text-muted">Uploading...</small>
+              </div>
+
+              <!-- File List -->
+              <div id="fileList" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis Settings -->
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5>Analysis Settings</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="subjectSelect" class="form-label">Subject</label>
+                <select class="form-select" id="subjectSelect">
+                  <option value="mathematics">Mathematics</option>
+                  <option value="physics">Physics</option>
+                  <option value="chemistry">Chemistry</option>
+                  <option value="biology">Biology</option>
+                  <option value="english">English</option>
+                  <option value="history">History</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="levelSelect" class="form-label">Student Level</label>
+                <select class="form-select" id="levelSelect">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate" selected>Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+              <button id="analyzeBtn" class="btn btn-primary w-100" disabled>
+                <i class="fas fa-brain"></i> Analyze Materials
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   setupEventListeners() {
@@ -109,6 +178,9 @@ class FileUpload {
     this.uploadedFiles.push(fileObj);
     this.updateFileList();
     this.updateAnalyzeButton();
+    
+    // Emit event for other components
+    this.emit("filesUploaded", this.uploadedFiles);
   }
 
   removeFile(fileId) {
@@ -131,23 +203,28 @@ class FileUpload {
 
   createFileItem(fileObj) {
     const div = document.createElement("div");
-    div.className = "file-item";
+    div.className = "file-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded";
     div.innerHTML = `
-            <div class="file-info">
-                <i class="fas fa-file file-icon"></i>
-                <div class="file-details">
-                    <h6>${fileObj.name}</h6>
-                    <small>${this.formatFileSize(fileObj.size)}</small>
-                </div>
-            </div>
-            <div class="file-actions">
-                <button class="btn btn-sm btn-outline-danger" onclick="fileUpload.removeFile('${
-                  fileObj.id
-                }')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
+      <div class="file-info d-flex align-items-center">
+        <i class="fas fa-file file-icon me-2"></i>
+        <div class="file-details">
+          <h6 class="mb-0">${fileObj.name}</h6>
+          <small class="text-muted">${this.formatFileSize(fileObj.size)}</small>
+        </div>
+      </div>
+      <div class="file-actions">
+        <button class="btn btn-sm btn-outline-danger remove-file-btn" data-file-id="${fileObj.id}">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `;
+    
+    // Add event listener for remove button
+    const removeBtn = div.querySelector(".remove-file-btn");
+    removeBtn.addEventListener("click", () => {
+      this.removeFile(fileObj.id);
+    });
+    
     return div;
   }
 
@@ -161,39 +238,15 @@ class FileUpload {
   async analyzeFiles() {
     if (this.uploadedFiles.length === 0) return;
 
-    const subject =
-      document.getElementById("subjectSelect")?.value || "mathematics";
-    const studentLevel =
-      document.getElementById("levelSelect")?.value || "intermediate";
+    const subject = document.getElementById("subjectSelect")?.value || "mathematics";
+    const studentLevel = document.getElementById("levelSelect")?.value || "intermediate";
 
-    // Show analysis results section
-    const resultsSection = document.getElementById("analysisResults");
-    if (resultsSection) {
-      resultsSection.style.display = "block";
-      resultsSection.scrollIntoView({ behavior: "smooth" });
-    }
-
-    // Combine all file contents for analysis
-    let combinedContent = "";
-    for (const fileObj of this.uploadedFiles) {
-      const content = await this.readFileContent(fileObj.file);
-      combinedContent += `\n\n--- ${fileObj.name} ---\n${content}`;
-    }
-
-    // Call analysis API
-    try {
-      const result = await analysisAPI.analyzeWithDelay(
-        combinedContent,
-        "mixed",
-        subject,
-        studentLevel
-      );
-
-      this.displayAnalysisResults(result);
-    } catch (error) {
-      console.error("Analysis failed:", error);
-      this.showError("Analysis failed. Please try again.");
-    }
+    // Emit analysis request event
+    this.emit("analysisRequested", {
+      files: this.uploadedFiles,
+      subject,
+      studentLevel
+    });
   }
 
   async readFileContent(file) {
@@ -215,72 +268,6 @@ class FileUpload {
     });
   }
 
-  displayAnalysisResults(result) {
-    // Update score
-    const scoreElement = document.getElementById("analysisScore");
-    if (scoreElement) {
-      scoreElement.textContent = `${result.overallScore}%`;
-      scoreElement.className = `badge ${this.getScoreClass(
-        result.overallScore
-      )} fs-6`;
-    }
-
-    // Update summary
-    const summaryElement = document.getElementById("analysisSummary");
-    if (summaryElement) {
-      summaryElement.textContent = result.feedback.summary;
-    }
-
-    // Update detailed scores
-    this.updateScoreElement(
-      "conceptScore",
-      result.detailedAnalysis.conceptUnderstanding
-    );
-    this.updateScoreElement(
-      "problemScore",
-      result.detailedAnalysis.problemSolving
-    );
-    this.updateScoreElement(
-      "completenessScore",
-      result.detailedAnalysis.completeness
-    );
-    this.updateScoreElement("accuracyScore", result.detailedAnalysis.accuracy);
-
-    // Update lists
-    this.updateList("strengthsList", result.feedback.strengths);
-    this.updateList("weakAreasList", result.feedback.weakAreas);
-    this.updateList("priorityTopicsList", result.studyPlan.priorityTopics);
-    this.updateList("nextStepsList", result.studyPlan.nextSteps);
-    this.updateList("recommendationsList", result.feedback.recommendations);
-  }
-
-  updateScoreElement(elementId, score) {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.textContent = score;
-    }
-  }
-
-  updateList(elementId, items) {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-
-    element.innerHTML = "";
-    items.forEach((item) => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      li.className = "mb-1";
-      element.appendChild(li);
-    });
-  }
-
-  getScoreClass(score) {
-    if (score >= 85) return "bg-success";
-    if (score >= 70) return "bg-info";
-    if (score >= 50) return "bg-warning";
-    return "bg-danger";
-  }
-
   formatFileSize(bytes) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -297,10 +284,25 @@ class FileUpload {
     // Simple error display - could be enhanced with toast notifications
     alert(message);
   }
+
+  // Event system for component communication
+  on(event, callback) {
+    if (!this.eventListeners[event]) {
+      this.eventListeners[event] = [];
+    }
+    this.eventListeners[event].push(callback);
+  }
+
+  emit(event, data) {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event].forEach(callback => callback(data));
+    }
+  }
+
+  enableAnalysis() {
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    if (analyzeBtn) {
+      analyzeBtn.disabled = false;
+    }
+  }
 }
-
-// Create global instance
-const fileUpload = new FileUpload();
-
-// Export for module usage
-export default FileUpload;
