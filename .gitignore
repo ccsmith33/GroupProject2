@@ -129,3 +129,6 @@ out/
 TestResults/
 *.trx
 *.coverage
+
+# Local test files with API keys
+testAI/
