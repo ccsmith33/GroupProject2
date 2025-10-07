@@ -1,0 +1,110 @@
+# Student Study AI Platform - Cursor Rules
+
+## Project Overview
+
+AI-powered study platform with .NET 8 backend, vanilla JavaScript frontend, and MySQL database.
+
+## Tech Stack Requirements
+
+- **Backend**: C# .NET 8, MySQL 8.0.37, raw ADO.NET (NO ORM)
+- **Frontend**: Vanilla JavaScript + HTML5 + CSS3
+- **Database**: MySQL with manual SQL queries
+- **AI**: GPT-4o integration (mock data by default)
+
+## Code Standards
+
+### C# Backend
+
+- Use `async/await` for all database operations
+- Raw MySQL connections with `MySql.Data` package
+- JSON serialization for complex types in database
+- Proper error handling with try-catch blocks
+- Use dependency injection for services
+
+### JavaScript Frontend
+
+- ES6+ modules with import/export
+- Async/await for API calls
+- Error handling with try-catch
+- Use double quotes for strings (user preference)
+- Small, reusable components
+
+### Database
+
+- Store complex objects as JSON strings
+- Use helper properties for JSON serialization/deserialization
+- Foreign key relationships for data integrity
+- UTF8MB4 character set for full Unicode support
+
+## File Structure
+
+```
+backend/
+├── Controllers/     # API endpoints
+├── Services/       # Business logic (DatabaseService, etc.)
+├── Models/         # Data models with JSON helpers
+└── Program.cs      # Entry point with DI setup
+
+frontend/
+├── js/
+│   ├── api/        # API communication
+│   ├── components/ # UI components
+│   └── utils/      # Helper functions
+└── index.html      # Main page
+```
+
+## Key Patterns
+
+### Database Operations
+
+```csharp
+// Always use using statements
+using var connection = await GetConnectionAsync();
+var command = new MySqlCommand(sql, connection);
+await command.ExecuteNonQueryAsync();
+```
+
+### JSON Handling
+
+```csharp
+// Store as JSON string
+public string Feedback { get; set; } = string.Empty;
+
+// Helper property for object access
+public Feedback? FeedbackData
+{
+    get => JsonSerializer.Deserialize<Feedback>(Feedback);
+    set => Feedback = JsonSerializer.Serialize(value);
+}
+```
+
+### API Responses
+
+```csharp
+// Consistent response format
+return Results.Ok(new { message = "Success", data = result });
+return Results.Problem($"Error: {ex.Message}");
+```
+
+## Important Notes
+
+- **NO Entity Framework** - Use raw ADO.NET only
+- **Mock data by default** - Real AI integration is optional
+- **Error messages** - Provide clear, actionable error messages
+- **Database initialization** - Automatic via `/init-db` endpoint
+- **CORS enabled** - For frontend development
+
+## Development Workflow
+
+1. Backend changes: `dotnet run --watch`
+2. Frontend changes: Refresh browser
+3. Database changes: Update `DatabaseService.cs`
+4. Test endpoints: Use provided API documentation
+
+## Code Quality
+
+- Write self-documenting code
+- Use meaningful variable names
+- Add comments for complex logic
+- Handle all error cases
+- Test with both mock and real data
