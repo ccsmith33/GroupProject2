@@ -9,6 +9,7 @@ class Header {
   init() {
     this.render();
     this.setupEventListeners();
+    this.setInitialActiveTab();
   }
 
   render() {
@@ -247,6 +248,15 @@ class Header {
     document.dispatchEvent(event);
 
     console.log(`Switched to ${tabName} tab`);
+  }
+
+  // Set initial active tab
+  setInitialActiveTab() {
+    // Set Study tab as active by default
+    const studyTab = document.getElementById("studyTab");
+    if (studyTab) {
+      studyTab.classList.add('active');
+    }
   }
 
   async handleLogin() {

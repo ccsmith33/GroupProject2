@@ -20,8 +20,9 @@ class App {
         <div id="app-header"></div>
         <div class="container mt-4">
           <div id="app-dashboard"></div>
-          <div id="app-file-upload"></div>
-          <div id="app-analysis"></div>
+          <div id="app-file-upload" style="display: none;"></div>
+          <div id="app-analysis" style="display: none;"></div>
+          <div id="app-profile" style="display: none;"></div>
         </div>
       </div>
     `;
@@ -34,10 +35,11 @@ class App {
       this.components.dashboard = new Dashboard(document.getElementById("app-dashboard"));
       this.components.fileUpload = new FileUpload(document.getElementById("app-file-upload"));
       this.components.analysis = new Analysis(document.getElementById("app-analysis"));
+      this.components.profile = new Profile(document.getElementById("app-profile"));
 
       // Setup component communication
       this.setupComponentCommunication();
-      
+
       console.log("All components initialized successfully");
     } catch (error) {
       console.error("Failed to initialize components:", error);
@@ -56,8 +58,48 @@ class App {
 
     // Analysis events
     this.components.analysis.on("analysisComplete", (results) => {
-      this.components.dashboard.updateWithResults(results);
+      this.components.profile.updateWithResults(results);
     });
+
+    // Tab change events
+    document.addEventListener("tabChanged", (e) => {
+      this.handleTabChange(e.detail.activeTab);
+    });
+  }
+
+  handleTabChange(activeTab) {
+    // Hide all sections
+    const sections = ['app-dashboard', 'app-file-upload', 'app-analysis', 'app-profile'];
+    sections.forEach(sectionId => {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.style.display = 'none';
+      }
+    });
+
+    // Show the active section
+    let activeSectionId;
+    switch(activeTab) {
+      case 'study':
+        activeSectionId = 'app-dashboard';
+        break;
+      case 'upload':
+        activeSectionId = 'app-file-upload';
+        break;
+      case 'profile':
+        activeSectionId = 'app-profile';
+        break;
+      default:
+        activeSectionId = 'app-dashboard';
+    }
+
+    const activeSection = document.getElementById(activeSectionId);
+    if (activeSection) {
+      activeSection.style.display = 'block';
+    }
+
+    // Scroll to top when switching tabs
+    window.scrollTo(0, 0);
   }
 
   // Global event handling
