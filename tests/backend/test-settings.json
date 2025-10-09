@@ -1,0 +1,37 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=StudentStudyAI_Test;Uid=root;Pwd=test;Port=3306;SslMode=None;AllowPublicKeyRetrieval=true;"
+  },
+  "TestDatabase": {
+    "ConnectionString": "Server=localhost;Database=StudentStudyAI_Test;Uid=root;Pwd=test;Port=3306;SslMode=None;AllowPublicKeyRetrieval=true;",
+    "UseInMemory": false
+  },
+  "OpenAI": {
+    "ApiKey": "test-key",
+    "BaseUrl": "https://api.openai.com/v1",
+    "UseMock": true
+  },
+  "FileStorage": {
+    "Path": "test-uploads",
+    "UseInMemory": true
+  },
+  "Jwt": {
+    "SecretKey": "TestSecretKeyThatIsAtLeast32CharactersLong!",
+    "Issuer": "StudentStudyAI_Test",
+    "Audience": "StudentStudyAI_Test",
+    "ExpiryMinutes": 60
+  },
+  "FileUpload": {
+    "MaxFileSize": 10485760,
+    "AllowedExtensions": [
+      ".pdf",
+      ".txt",
+      ".docx",
+      ".pptx",
+      ".jpg",
+      ".jpeg",
+      ".png"
+    ],
+    "UploadPath": "test-uploads"
+  }
+}

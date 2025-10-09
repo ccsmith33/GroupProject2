@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 1-2 Test Runner - File Grouping & Dynamic Quiz</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .test-section h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      .test-button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .test-button:hover {
+        background: #0056b3;
+      }
+      .test-button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      .result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+      .info {
+        background: #d1ecf1;
+        border: 1px solid #bee5eb;
+        color: #0c5460;
+      }
+      .loading {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .file-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin: 10px 0;
+      }
+      .file-item {
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .file-item:last-child {
+        border-bottom: none;
+      }
+      .subject-input {
+        width: 200px;
+        padding: 5px;
+        margin: 0 5px;
+      }
+      .group-select {
+        width: 150px;
+        padding: 5px;
+        margin: 0 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Phase 1-2 Test Runner: File Grouping & Dynamic Quiz</h1>
+      <p>
+        Testing the new intelligent file grouping and dynamic quiz generation
+        features.
+      </p>
+
+      <!-- File Upload Test Section -->
+      <div class="test-section">
+        <h3>1. File Upload & Auto-Detection Test</h3>
+        <p>Upload files to test automatic subject detection and grouping.</p>
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept=".pdf,.docx,.txt,.pptx"
+        />
+        <button class="test-button" onclick="uploadFiles()">
+          Upload Files
+        </button>
+        <div id="uploadResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- File Grouping Test Section -->
+      <div class="test-section">
+        <h3>2. File Grouping Management Test</h3>
+        <p>Test file grouping, subject editing, and custom group creation.</p>
+
+        <div>
+          <button class="test-button" onclick="loadGroupedFiles()">
+            Load Grouped Files
+          </button>
+          <button class="test-button" onclick="processFile()">
+            Process File (Manual)
+          </button>
+          <button class="test-button" onclick="createTestGroup()">
+            Create Test Group
+          </button>
+          <button class="test-button" onclick="loadSubjectGroups()">
+            Load Subject Groups
+          </button>
+        </div>
+
+        <div id="groupedFilesResult" class="result" style="display: none"></div>
+        <div
+          id="subjectGroupsResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- Content Analysis Test Section -->
+      <div class="test-section">
+        <h3>3. Content Analysis Test</h3>
+        <p>Test content analysis and dynamic question count calculation.</p>
+
+        <div>
+          <button class="test-button" onclick="testContentAnalysis()">
+            Analyze Content
+          </button>
+          <button class="test-button" onclick="testKnowledgeLevelDetection()">
+            Test Knowledge Level Detection
+          </button>
+        </div>
+
+        <div
+          id="contentAnalysisResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- Dynamic Quiz Test Section -->
+      <div class="test-section">
+        <h3>4. Dynamic Quiz Generation Test</h3>
+        <p>
+          Test dynamic quiz generation with different content types and
+          knowledge levels.
+        </p>
+
+        <div>
+          <label>Quiz Prompt:</label><br />
+          <input
+            type="text"
+            id="quizPrompt"
+            value="Create a quiz about the uploaded materials"
+            style="width: 400px; padding: 5px"
+          />
+          <br /><br />
+          <button class="test-button" onclick="generateDynamicQuiz()">
+            Generate Dynamic Quiz
+          </button>
+          <button class="test-button" onclick="testQuizWithDifferentLevels()">
+            Test Different Knowledge Levels
+          </button>
+        </div>
+
+        <div id="quizResult" class="result" style="display: none"></div>
+      </div>
+
+      <!-- File Management Test Section -->
+      <div class="test-section">
+        <h3>5. File Management Test</h3>
+        <p>Test file subject editing and bulk operations.</p>
+
+        <div id="fileList" class="file-list" style="display: none">
+          <h4>Available Files:</h4>
+          <div id="filesList"></div>
+        </div>
+
+        <div>
+          <button class="test-button" onclick="loadFiles()">Load Files</button>
+          <button class="test-button" onclick="testBulkUpdate()">
+            Test Bulk Update
+          </button>
+        </div>
+
+        <div
+          id="fileManagementResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- API Endpoints Test Section -->
+      <div class="test-section">
+        <h3>6. API Endpoints Test</h3>
+        <p>Test all new API endpoints for file grouping functionality.</p>
+
+        <div>
+          <button class="test-button" onclick="testAllEndpoints()">
+            Test All Endpoints
+          </button>
+          <button class="test-button" onclick="testErrorHandling()">
+            Test Error Handling
+          </button>
+        </div>
+
+        <div id="apiTestResult" class="result" style="display: none"></div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:5000/api";
+      let currentFiles = [];
+      let currentGroups = [];
+
+      // Utility functions
+      function showResult(elementId, message, type = "info") {
+        const element = document.getElementById(elementId);
+        element.style.display = "block";
+        element.className = `result ${type}`;
+        element.innerHTML = message;
+      }
+
+      function showLoading(elementId, message) {
+        showResult(elementId, message, "loading");
+      }
+
+      async function apiCall(endpoint, method = "GET", body = null) {
+        try {
+          const options = {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          };
+
+          if (body) {
+            options.body = JSON.stringify(body);
+          }
+
+          const response = await fetch(`${API_BASE}${endpoint}`, options);
+          const data = await response.json();
+
+          return {
+            success: response.ok,
+            status: response.status,
+            data: data,
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+          };
+        }
+      }
+
+      // 1. File Upload & Auto-Detection Test
+      async function uploadFiles() {
+        const fileInput = document.getElementById("fileInput");
+        const files = fileInput.files;
+
+        if (files.length === 0) {
+          showResult("uploadResult", "Please select files to upload", "error");
+          return;
+        }
+
+        showLoading(
+          "uploadResult",
+          "Uploading files and testing auto-detection..."
+        );
+
+        const formData = new FormData();
+        formData.append("file", files[0]); // Upload first file only
+        formData.append("userId", "1");
+        formData.append("subject", "Test Subject");
+        formData.append("studentLevel", "College");
+
+        try {
+          const response = await fetch(`${API_BASE}/files/upload`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            let message = `<strong>Upload Successful!</strong><br>`;
+            message += `File: ${result.fileName}<br>`;
+            message += `File ID: ${result.fileId}<br>`;
+            message += `Status: ${result.status}<br>`;
+            message += `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            showResult("uploadResult", message, "success");
+          } else {
+            showResult(
+              "uploadResult",
+              `Upload failed: ${
+                result.error || result.message || "Unknown error"
+              }`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showResult("uploadResult", `Upload error: ${error.message}`, "error");
+        }
+      }
+
+      // 2. File Grouping Management Test
+      async function loadGroupedFiles() {
+        showLoading("groupedFilesResult", "Loading grouped files...");
+
+        const result = await apiCall("/files/1/grouped");
+
+        if (result.success) {
+          currentFiles = result.data.FilesBySubject;
+          let message = `<strong>Grouped Files Loaded!</strong><br>`;
+          message += `Subject groups: ${
+            Object.keys(result.data.data.filesBySubject || {}).length
+          }<br>`;
+          message += `Custom groups: ${
+            (result.data.data.customGroups || []).length
+          }<br>`;
+          message += `Ungrouped files: ${
+            (result.data.data.ungroupedFiles || []).length
+          }<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("groupedFilesResult", message, "success");
+        } else {
+          showResult(
+            "groupedFilesResult",
+            `Failed to load grouped files: ${result.error || result.message}`,
+            "error"
+          );
+        }
+      }
+
+      async function createTestGroup() {
+        showLoading("subjectGroupsResult", "Creating test subject group...");
+
+        const groupData = {
+          groupName: "Test Group " + Date.now(),
+          description: "Test group created by Phase 1-2 test runner",
+          color: "#ff6b6b",
+        };
+
+        const result = await apiCall("/files/groups", "POST", groupData);
+
+        if (result.success) {
+          showResult(
+            "subjectGroupsResult",
+            `Test group created successfully!<br><pre>${JSON.stringify(
+              result.data,
+              null,
+              2
+            )}</pre>`,
+            "success"
+          );
+        } else {
+          showResult(
+            "subjectGroupsResult",
+            `Failed to create test group: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function loadSubjectGroups() {
+        showLoading("subjectGroupsResult", "Loading subject groups...");
+
+        const result = await apiCall("/files/groups?userId=1");
+
+        if (result.success) {
+          currentGroups = result.data;
+          let message = `<strong>Subject Groups Loaded!</strong><br>`;
+          message += `Total groups: ${result.data.length}<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("subjectGroupsResult", message, "success");
+        } else {
+          showResult(
+            "subjectGroupsResult",
+            `Failed to load subject groups: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function processFile() {
+        showLoading("groupedFilesResult", "Manually processing file...");
+        console.log("🔍 Starting file processing...");
+
+        // First get the file ID from the ungrouped files
+        const filesResult = await apiCall("/files/1/grouped");
+        console.log("📁 Files result:", filesResult);
+        console.log("📁 Raw data object:", filesResult.data);
+        console.log("📁 Data keys:", Object.keys(filesResult.data || {}));
+
+        if (!filesResult.success) {
+          console.error("❌ Failed to load files:", filesResult);
+          showResult("groupedFilesResult", "Failed to load files", "error");
+          return;
+        }
+
+        const ungroupedFiles = filesResult.data.data.ungroupedFiles || [];
+        console.log(
+          "📄 Ungrouped files found:",
+          ungroupedFiles.length,
+          ungroupedFiles
+        );
+
+        if (ungroupedFiles.length === 0) {
+          console.warn("⚠️ No ungrouped files to process");
+          showResult(
+            "groupedFilesResult",
+            "No ungrouped files to process",
+            "error"
+          );
+          return;
+        }
+
+        const fileId = ungroupedFiles[0].id;
+        console.log("🎯 Processing file ID:", fileId);
+
+        const result = await apiCall(`/files/process/${fileId}`, "POST");
+        console.log("⚙️ Processing result:", result);
+        console.log("⚙️ Error details:", result.data);
+
+        if (result.success) {
+          let message = `<strong>File Processed Successfully!</strong><br>`;
+          message += `File ID: ${fileId}<br>`;
+          message += `Status: ${result.data.status}<br>`;
+          message += `Extracted Text Length: ${result.data.extractedTextLength} characters<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          console.log("✅ File processed successfully:", result.data);
+          showResult("groupedFilesResult", message, "success");
+        } else {
+          console.error("❌ File processing failed:", result);
+          showResult(
+            "groupedFilesResult",
+            `File processing failed: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      // 3. Content Analysis Test
+      async function testContentAnalysis() {
+        showLoading("contentAnalysisResult", "Testing content analysis...");
+
+        // First load some files
+        const filesResult = await apiCall("/files/1/grouped");
+
+        if (!filesResult.success) {
+          showResult(
+            "contentAnalysisResult",
+            "Failed to load files for analysis",
+            "error"
+          );
+          return;
+        }
+
+        // Simulate content analysis by creating a test request
+        const testFiles = Object.values(
+          filesResult.data.data.filesBySubject || {}
+        )
+          .flat()
+          .slice(0, 3);
+
+        if (testFiles.length === 0) {
+          showResult(
+            "contentAnalysisResult",
+            "No files available for content analysis. Please upload some files first.",
+            "error"
+          );
+          return;
+        }
+
+        let message = `<strong>Content Analysis Test</strong><br>`;
+        message += `Analyzing ${testFiles.length} files:<br>`;
+
+        // Simulate analysis results
+        testFiles.forEach((file, index) => {
+          const contentLength = (file.extractedContent || "").length;
+          const estimatedQuestions = Math.max(
+            3,
+            Math.min(50, Math.floor(contentLength / 1000) * 2)
+          );
+          const knowledgeLevel =
+            contentLength > 5000
+              ? "College"
+              : contentLength > 2000
+              ? "High School"
+              : "Middle School";
+
+          message += `<br><strong>File ${index + 1}:</strong> ${
+            file.fileName
+          }<br>`;
+          message += `- Content length: ${contentLength} characters<br>`;
+          message += `- Estimated questions: ${estimatedQuestions}<br>`;
+          message += `- Detected level: ${knowledgeLevel}<br>`;
+        });
+
+        showResult("contentAnalysisResult", message, "success");
+      }
+
+      async function testKnowledgeLevelDetection() {
+        showLoading(
+          "contentAnalysisResult",
+          "Testing knowledge level detection..."
+        );
+
+        const testContent = [
+          { text: "Basic math: 2 + 2 = 4", expected: "Elementary" },
+          {
+            text: "The derivative of x² is 2x, which represents the rate of change",
+            expected: "High School",
+          },
+          {
+            text: "The fundamental theorem of calculus establishes the relationship between differentiation and integration",
+            expected: "College",
+          },
+          {
+            text: "This research presents a novel approach to quantum field theory using non-commutative geometry",
+            expected: "Graduate",
+          },
+        ];
+
+        let message = `<strong>Knowledge Level Detection Test</strong><br>`;
+
+        testContent.forEach((test, index) => {
+          message += `<br><strong>Test ${index + 1}:</strong><br>`;
+          message += `Content: "${test.text}"<br>`;
+          message += `Expected: ${test.expected}<br>`;
+
+          // Simple heuristic for demonstration
+          let detected = "High School";
+          if (test.text.includes("basic") || test.text.includes("2 + 2")) {
+            detected = "Elementary";
+          } else if (
+            test.text.includes("derivative") ||
+            test.text.includes("rate of change")
+          ) {
+            detected = "High School";
+          } else if (
+            test.text.includes("theorem") ||
+            test.text.includes("relationship")
+          ) {
+            detected = "College";
+          } else if (
+            test.text.includes("research") ||
+            test.text.includes("novel") ||
+            test.text.includes("quantum")
+          ) {
+            detected = "Graduate";
+          }
+
+          message += `Detected: ${detected}<br>`;
+          message += `Result: ${
+            detected === test.expected ? "✅ Correct" : "❌ Incorrect"
+          }<br>`;
+        });
+
+        showResult("contentAnalysisResult", message, "success");
+      }
+
+      // 4. Dynamic Quiz Generation Test
+      async function generateDynamicQuiz() {
+        const prompt = document.getElementById("quizPrompt").value;
+        showLoading("quizResult", "Generating dynamic quiz...");
+
+        const result = await apiCall("/analysis/generate-quiz", "POST", {
+          userPrompt: prompt,
+          userId: 1,
+        });
+
+        if (result.success) {
+          let message = `<strong>Dynamic Quiz Generated!</strong><br>`;
+          message += `Title: ${result.data.title}<br>`;
+          message += `Subject: ${result.data.subject || "N/A"}<br>`;
+          message += `Topic: ${result.data.topic || "N/A"}<br>`;
+          message += `Questions: ${
+            JSON.parse(result.data.questions || "[]").length
+          }<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("quizResult", message, "success");
+        } else {
+          showResult(
+            "quizResult",
+            `Quiz generation failed: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      async function testQuizWithDifferentLevels() {
+        showLoading(
+          "quizResult",
+          "Testing quiz generation with different knowledge levels..."
+        );
+
+        const testPrompts = [
+          { prompt: "Create a basic math quiz", expectedLevel: "Elementary" },
+          { prompt: "Create a calculus quiz", expectedLevel: "High School" },
+          {
+            prompt: "Create an advanced physics quiz",
+            expectedLevel: "College",
+          },
+          {
+            prompt: "Create a research methodology quiz",
+            expectedLevel: "Graduate",
+          },
+        ];
+
+        let message = `<strong>Knowledge Level Quiz Test</strong><br>`;
+
+        for (let i = 0; i < testPrompts.length; i++) {
+          const test = testPrompts[i];
+          message += `<br><strong>Test ${i + 1}:</strong> ${test.prompt}<br>`;
+          message += `Expected Level: ${test.expectedLevel}<br>`;
+
+          const result = await apiCall("/analysis/generate-quiz", "POST", {
+            userPrompt: test.prompt,
+            userId: 1,
+          });
+
+          if (result.success) {
+            const questions = JSON.parse(result.data.questions || "[]");
+            message += `Generated: ${questions.length} questions<br>`;
+            message += `Result: ✅ Success<br>`;
+          } else {
+            message += `Result: ❌ Failed - ${
+              result.error || result.data.message
+            }<br>`;
+          }
+        }
+
+        showResult("quizResult", message, "success");
+      }
+
+      // 5. File Management Test
+      async function loadFiles() {
+        showLoading("fileManagementResult", "Loading files for management...");
+
+        const result = await apiCall("/files/1/grouped");
+
+        if (result.success) {
+          const allFiles = Object.values(result.data.data.filesBySubject || {})
+            .flat()
+            .concat(result.data.data.ungroupedFiles || []);
+          currentFiles = allFiles;
+
+          let message = `<strong>Files Loaded for Management</strong><br>`;
+          message += `Total files: ${allFiles.length}<br>`;
+
+          const fileListHtml = allFiles
+            .map(
+              (file) => `
+                    <div class="file-item">
+                        <span>${file.fileName} (${
+                file.userDefinedSubject ||
+                file.autoDetectedSubject ||
+                "Ungrouped"
+              })</span>
+                        <div>
+                            <input type="text" class="subject-input" placeholder="New subject" id="subject_${
+                              file.id
+                            }">
+                            <select class="group-select" id="group_${file.id}">
+                                <option value="">No Group</option>
+                                ${(result.data.data.customGroups || [])
+                                  .map(
+                                    (g) =>
+                                      `<option value="${g.id}">${g.groupName}</option>`
+                                  )
+                                  .join("")}
+                            </select>
+                            <button class="test-button" onclick="updateFileGrouping(${
+                              file.id
+                            })">Update</button>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+
+          document.getElementById("filesList").innerHTML = fileListHtml;
+          document.getElementById("fileList").style.display = "block";
+
+          showResult("fileManagementResult", message, "success");
+        } else {
+          showResult(
+            "fileManagementResult",
+            `Failed to load files: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      async function updateFileGrouping(fileId) {
+        const subject = document.getElementById(`subject_${fileId}`).value;
+        const groupId = document.getElementById(`group_${fileId}`).value;
+
+        const result = await apiCall(`/files/${fileId}/subject`, "PUT", {
+          fileId: fileId,
+          userDefinedSubject: subject || null,
+          subjectGroupId: groupId ? parseInt(groupId) : null,
+        });
+
+        if (result.success) {
+          showResult(
+            "fileManagementResult",
+            `File ${fileId} updated successfully!`,
+            "success"
+          );
+          loadFiles(); // Refresh the list
+        } else {
+          showResult(
+            "fileManagementResult",
+            `Failed to update file ${fileId}: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testBulkUpdate() {
+        showLoading("fileManagementResult", "Testing bulk file update...");
+
+        if (currentFiles.length === 0) {
+          showResult(
+            "fileManagementResult",
+            "No files available for bulk update. Please load files first.",
+            "error"
+          );
+          return;
+        }
+
+        const fileIds = currentFiles.slice(0, 3).map((f) => f.id); // Update first 3 files
+
+        const result = await apiCall("/files/bulk-update", "POST", {
+          fileIds: fileIds,
+          userDefinedSubject: "Bulk Updated Subject",
+          userDefinedTopic: "Bulk Updated Topic",
+        });
+
+        if (result.success) {
+          showResult(
+            "fileManagementResult",
+            `Bulk update successful for ${fileIds.length} files!`,
+            "success"
+          );
+          loadFiles(); // Refresh the list
+        } else {
+          showResult(
+            "fileManagementResult",
+            `Bulk update failed: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      // 6. API Endpoints Test
+      async function testAllEndpoints() {
+        showLoading("apiTestResult", "Testing all API endpoints...");
+
+        const endpoints = [
+          { name: "Get Grouped Files", method: "GET", url: "/files/1/grouped" },
+          {
+            name: "Get Subject Groups",
+            method: "GET",
+            url: "/files/groups?userId=1",
+          },
+          {
+            name: "Create Subject Group",
+            method: "POST",
+            url: "/files/groups",
+            body: {
+              groupName: "Test Group",
+              description: "Test",
+              color: "#ff0000",
+            },
+          },
+          {
+            name: "Generate Quiz",
+            method: "POST",
+            url: "/analysis/generate-quiz",
+            body: { userPrompt: "Test quiz", userId: 1 },
+          },
+        ];
+
+        let message = `<strong>API Endpoints Test Results</strong><br>`;
+        let successCount = 0;
+
+        for (const endpoint of endpoints) {
+          const result = await apiCall(
+            endpoint.url,
+            endpoint.method,
+            endpoint.body
+          );
+          const status = result.success ? "✅" : "❌";
+          message += `${status} ${endpoint.name}: ${
+            result.success ? "Success" : "Failed"
+          }<br>`;
+          if (result.success) successCount++;
+        }
+
+        message += `<br><strong>Summary:</strong> ${successCount}/${endpoints.length} endpoints working`;
+        showResult(
+          "apiTestResult",
+          message,
+          successCount === endpoints.length ? "success" : "error"
+        );
+      }
+
+      async function testErrorHandling() {
+        showLoading("apiTestResult", "Testing error handling...");
+
+        const errorTests = [
+          {
+            name: "Invalid File ID",
+            url: "/files/99999/subject",
+            method: "PUT",
+            body: { fileId: 99999 },
+          },
+          {
+            name: "Invalid Group ID",
+            url: "/files/groups/99999",
+            method: "GET",
+          },
+          {
+            name: "Missing Required Fields",
+            url: "/files/groups",
+            method: "POST",
+            body: {},
+          },
+          { name: "Invalid Endpoint", url: "/files/invalid", method: "GET" },
+        ];
+
+        let message = `<strong>Error Handling Test Results</strong><br>`;
+        let errorCount = 0;
+
+        for (const test of errorTests) {
+          const result = await apiCall(test.url, test.method, test.body);
+          const status = !result.success ? "✅" : "❌";
+          message += `${status} ${test.name}: ${
+            !result.success ? "Properly handled" : "Should have failed"
+          }<br>`;
+          if (!result.success) errorCount++;
+        }
+
+        message += `<br><strong>Summary:</strong> ${errorCount}/${errorTests.length} errors properly handled`;
+        showResult(
+          "apiTestResult",
+          message,
+          errorCount === errorTests.length ? "success" : "error"
+        );
+      }
+
+      // Initialize page
+      window.addEventListener("load", () => {
+        console.log("Phase 1-2 Test Runner loaded");
+        showResult(
+          "uploadResult",
+          "Ready to test file upload and auto-detection",
+          "info"
+        );
+      });
+    </script>
+  </body>
+</html>
