@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Study AI - API Test Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .section h3 {
+        margin-top: 0;
+        color: #333;
+      }
+      button {
+        padding: 8px 15px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+      }
+      input,
+      textarea,
+      select {
+        padding: 8px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        width: 200px;
+      }
+      textarea {
+        width: 400px;
+        height: 100px;
+      }
+      .response {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+      .success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+      }
+      .token-display {
+        background: #e2e3e5;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 3px;
+        word-break: break-all;
+      }
+      .file-upload {
+        border: 2px dashed #ccc;
+        padding: 20px;
+        text-align: center;
+        margin: 10px 0;
+      }
+      .hidden {
+        display: none;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      @media (max-width: 768px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Student Study AI - API Test Page</h1>
+      <p>
+        <strong>Base URL:</strong>
+        <span id="baseUrl">http://localhost:5000</span>
+      </p>
+
+      <!-- Authentication Section -->
+      <div class="section">
+        <h3>🔐 Authentication</h3>
+        <div>
+          <h4>Register</h4>
+          <input
+            type="text"
+            id="regUsername"
+            placeholder="Username"
+            value="testuser"
+          />
+          <input
+            type="email"
+            id="regEmail"
+            placeholder="Email"
+            value="test@example.com"
+          />
+          <input
+            type="password"
+            id="regPassword"
+            placeholder="Password"
+            value="password123"
+          />
+          <input
+            type="password"
+            id="regConfirmPassword"
+            placeholder="Confirm Password"
+            value="password123"
+          />
+          <button onclick="register()">Register</button>
+        </div>
+        <div>
+          <h4>Login</h4>
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="Email"
+            value="test@example.com"
+          />
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            value="password123"
+          />
+          <button onclick="login()">Login</button>
+        </div>
+        <div class="token-display" id="tokenDisplay" style="display: none">
+          <strong>Token:</strong> <span id="tokenValue"></span>
+        </div>
+        <div>
+          <button onclick="logout()">Logout</button>
+          <button onclick="getCurrentUser()">Get Current User</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- User Management Section -->
+        <div class="section">
+          <h3>👤 User Management</h3>
+          <div>
+            <h4>Profile</h4>
+            <button onclick="getProfile()">Get Profile</button>
+            <button onclick="updateProfile()">Update Profile</button>
+            <br />
+            <input type="text" id="newUsername" placeholder="New Username" />
+            <input type="email" id="newEmail" placeholder="New Email" />
+          </div>
+          <div>
+            <h4>Stats</h4>
+            <button onclick="getUserStats()">Get User Stats</button>
+          </div>
+          <div>
+            <h4>Study Sessions</h4>
+            <button onclick="getStudySessions()">Get Study Sessions</button>
+            <button onclick="createStudySession()">Create Study Session</button>
+            <br />
+            <input
+              type="text"
+              id="sessionName"
+              placeholder="Session Name"
+              value="Test Session"
+            />
+            <textarea id="sessionNotes" placeholder="Session Notes">
+Testing API</textarea
+            >
+            <br />
+            <input
+              type="text"
+              id="sessionFileIds"
+              placeholder="File IDs (comma separated)"
+              value="1,2"
+            />
+          </div>
+        </div>
+
+        <!-- File Management Section -->
+        <div class="section">
+          <h3>📁 File Management</h3>
+          <div>
+            <h4>Upload File</h4>
+            <div class="file-upload">
+              <input
+                type="file"
+                id="fileInput"
+                accept=".pdf,.txt,.docx,.pptx,.jpg,.jpeg,.png"
+              />
+              <br />
+              <input
+                type="text"
+                id="fileSubject"
+                placeholder="Subject"
+                value="Mathematics"
+              />
+              <input
+                type="text"
+                id="fileStudentLevel"
+                placeholder="Student Level"
+                value="Undergraduate"
+              />
+              <br />
+              <button onclick="uploadFile()">Upload File</button>
+            </div>
+          </div>
+          <div>
+            <h4>File Operations</h4>
+            <button onclick="getFileList()">Get File List</button>
+            <button onclick="getFileStatus()">Get File Status</button>
+            <br />
+            <input type="number" id="fileId" placeholder="File ID" value="1" />
+            <button onclick="deleteFile()">Delete File</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Analysis Section -->
+        <div class="section">
+          <h3>🤖 AI Analysis</h3>
+          <div>
+            <h4>File Analysis</h4>
+            <input
+              type="number"
+              id="analysisFileId"
+              placeholder="File ID"
+              value="1"
+            />
+            <button onclick="analyzeFile()">Analyze File</button>
+          </div>
+          <div>
+            <h4>Study Guide</h4>
+            <textarea id="studyGuidePrompt" placeholder="Study Guide Prompt">
+Create a study guide for calculus derivatives</textarea
+            >
+            <button onclick="generateStudyGuide()">Generate Study Guide</button>
+          </div>
+          <div>
+            <h4>Quiz Generation</h4>
+            <textarea id="quizPrompt" placeholder="Quiz Prompt">
+Create a quiz about calculus derivatives</textarea
+            >
+            <button onclick="generateQuiz()">Generate Quiz</button>
+          </div>
+          <div>
+            <h4>Chat</h4>
+            <textarea id="chatMessage" placeholder="Chat Message">
+Explain derivatives in simple terms</textarea
+            >
+            <button onclick="chat()">Send Message</button>
+          </div>
+        </div>
+
+        <!-- Data Retrieval Section -->
+        <div class="section">
+          <h3>📊 Data Retrieval</h3>
+          <div>
+            <h4>Study Guides</h4>
+            <button onclick="getStudyGuides()">Get Study Guides</button>
+          </div>
+          <div>
+            <h4>Quizzes</h4>
+            <button onclick="getQuizzes()">Get Quizzes</button>
+          </div>
+          <div>
+            <h4>Conversations</h4>
+            <button onclick="getConversations()">Get Conversations</button>
+          </div>
+          <div>
+            <h4>Quiz Attempt</h4>
+            <input type="number" id="quizId" placeholder="Quiz ID" value="1" />
+            <button onclick="submitQuizAttempt()">Submit Quiz Attempt</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response Display -->
+      <div class="section">
+        <h3>📋 API Response</h3>
+        <div id="response" class="response">Ready to test APIs...</div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:5000/api";
+      let authToken = localStorage.getItem("authToken");
+      let currentUserId = localStorage.getItem("currentUserId");
+
+      // Initialize
+      window.onload = function () {
+        updateTokenDisplay();
+      };
+
+      function updateTokenDisplay() {
+        const tokenDisplay = document.getElementById("tokenDisplay");
+        const tokenValue = document.getElementById("tokenValue");
+        if (authToken) {
+          tokenDisplay.style.display = "block";
+          tokenValue.textContent = authToken.substring(0, 50) + "...";
+        } else {
+          tokenDisplay.style.display = "none";
+        }
+      }
+
+      function showResponse(data, isError = false) {
+        const responseDiv = document.getElementById("response");
+        responseDiv.textContent = JSON.stringify(data, null, 2);
+        responseDiv.className = "response " + (isError ? "error" : "success");
+      }
+
+      function getHeaders() {
+        const headers = {
+          "Content-Type": "application/json",
+        };
+        if (authToken) {
+          headers["Authorization"] = `Bearer ${authToken}`;
+        }
+        return headers;
+      }
+
+      // Authentication Functions
+      async function register() {
+        const data = {
+          username: document.getElementById("regUsername").value,
+          email: document.getElementById("regEmail").value,
+          password: document.getElementById("regPassword").value,
+          confirmPassword: document.getElementById("regConfirmPassword").value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+
+          if (response.ok && result.accessToken) {
+            authToken = result.accessToken;
+            currentUserId = result.user.id;
+            localStorage.setItem("authToken", authToken);
+            localStorage.setItem("currentUserId", currentUserId);
+            updateTokenDisplay();
+          }
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function login() {
+        const data = {
+          email: document.getElementById("loginEmail").value,
+          password: document.getElementById("loginPassword").value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+
+          if (response.ok && result.accessToken) {
+            authToken = result.accessToken;
+            currentUserId = result.user.id;
+            localStorage.setItem("authToken", authToken);
+            localStorage.setItem("currentUserId", currentUserId);
+            updateTokenDisplay();
+          }
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function logout() {
+        try {
+          const response = await fetch(`${API_BASE}/auth/logout`, {
+            method: "POST",
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+
+          if (response.ok) {
+            authToken = null;
+            currentUserId = null;
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("currentUserId");
+            updateTokenDisplay();
+          }
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getCurrentUser() {
+        try {
+          const response = await fetch(`${API_BASE}/auth/me`, {
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // User Management Functions
+      async function getProfile() {
+        try {
+          const response = await fetch(`${API_BASE}/user/profile`, {
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function updateProfile() {
+        const data = {
+          username: document.getElementById("newUsername").value || undefined,
+          email: document.getElementById("newEmail").value || undefined,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/user/profile`, {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getUserStats() {
+        try {
+          const response = await fetch(`${API_BASE}/user/stats`, {
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getStudySessions() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/user/study-sessions?limit=10&offset=0`,
+            {
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function createStudySession() {
+        const fileIds = document
+          .getElementById("sessionFileIds")
+          .value.split(",")
+          .map((id) => parseInt(id.trim()))
+          .filter((id) => !isNaN(id));
+
+        const data = {
+          sessionName: document.getElementById("sessionName").value,
+          notes: document.getElementById("sessionNotes").value,
+          fileIds: fileIds.length > 0 ? fileIds : undefined,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/user/study-sessions`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // File Management Functions
+      async function uploadFile() {
+        const fileInput = document.getElementById("fileInput");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          showResponse({ error: "Please select a file" }, true);
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("userId", currentUserId || "1");
+        formData.append(
+          "subject",
+          document.getElementById("fileSubject").value
+        );
+        formData.append(
+          "studentLevel",
+          document.getElementById("fileStudentLevel").value
+        );
+
+        try {
+          const response = await fetch(`${API_BASE}/files/upload`, {
+            method: "POST",
+            body: formData,
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getFileList() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/file/list?userId=${currentUserId || "1"}`,
+            {
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getFileStatus() {
+        const fileId = document.getElementById("fileId").value;
+        try {
+          const response = await fetch(`${API_BASE}/file/${fileId}/status`, {
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function deleteFile() {
+        const fileId = document.getElementById("fileId").value;
+        try {
+          const response = await fetch(`${API_BASE}/file/${fileId}`, {
+            method: "DELETE",
+            headers: getHeaders(),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // Analysis Functions
+      async function analyzeFile() {
+        const fileId = document.getElementById("analysisFileId").value;
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/analyze-file/${fileId}?userId=${
+              currentUserId || "1"
+            }`,
+            {
+              method: "POST",
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function generateStudyGuide() {
+        const data = {
+          userPrompt: document.getElementById("studyGuidePrompt").value,
+        };
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/generate-study-guide`,
+            {
+              method: "POST",
+              headers: getHeaders(),
+              body: JSON.stringify(data),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function generateQuiz() {
+        const data = {
+          userPrompt: document.getElementById("quizPrompt").value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/analysis/generate-quiz`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function chat() {
+        const data = {
+          message: document.getElementById("chatMessage").value,
+        };
+
+        try {
+          const response = await fetch(`${API_BASE}/analysis/chat`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data),
+          });
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // Data Retrieval Functions
+      async function getStudyGuides() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/study-guides/${currentUserId || "1"}`,
+            {
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getQuizzes() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/quizzes/${currentUserId || "1"}`,
+            {
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function getConversations() {
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/conversations/${
+              currentUserId || "1"
+            }?limit=10`,
+            {
+              headers: getHeaders(),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      async function submitQuizAttempt() {
+        const data = {
+          quizId: parseInt(document.getElementById("quizId").value),
+          answers: [
+            { questionId: 1, answer: "Sample answer" },
+            { questionId: 2, answer: "Another answer" },
+          ],
+        };
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/analysis/submit-quiz-attempt`,
+            {
+              method: "POST",
+              headers: getHeaders(),
+              body: JSON.stringify(data),
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // Utility function to test database initialization
+      async function initDatabase() {
+        try {
+          const response = await fetch(
+            `${API_BASE.replace("/api", "")}/init-db`,
+            {
+              method: "GET",
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // Test MySQL connection
+      async function testMySQL() {
+        try {
+          const response = await fetch(
+            `${API_BASE.replace("/api", "")}/test-mysql`,
+            {
+              method: "GET",
+            }
+          );
+          const result = await response.json();
+          showResponse(result, !response.ok);
+        } catch (error) {
+          showResponse({ error: error.message }, true);
+        }
+      }
+
+      // Add database init button
+      document.addEventListener("DOMContentLoaded", function () {
+        const authSection = document.querySelector(".section");
+
+        const testButton = document.createElement("button");
+        testButton.textContent = "Test MySQL Connection";
+        testButton.onclick = testMySQL;
+        testButton.style.background = "#17a2b8";
+        authSection.appendChild(testButton);
+
+        const dbButton = document.createElement("button");
+        dbButton.textContent = "Initialize Database";
+        dbButton.onclick = initDatabase;
+        dbButton.style.background = "#28a745";
+        authSection.appendChild(dbButton);
+      });
+    </script>
+  </body>
+</html>

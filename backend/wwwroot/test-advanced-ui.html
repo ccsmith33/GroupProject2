@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced UI Test - Student Study AI Platform</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .header h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 2.5em;
+        font-weight: 300;
+      }
+
+      .header p {
+        color: #7f8c8d;
+        font-size: 1.1em;
+      }
+
+      .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+      }
+
+      .card h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 1.4em;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+      }
+
+      .file-upload-area {
+        border: 2px dashed #bdc3c7;
+        border-radius: 10px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+
+      .file-upload-area:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+      }
+
+      .file-upload-area.dragover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+      }
+
+      .btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin: 5px;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .btn-secondary {
+        background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+      }
+
+      .btn-success {
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+      }
+
+      .btn-danger {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+      }
+
+      .file-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #ecf0f1;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .file-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #ecf0f1;
+        transition: background 0.3s ease;
+      }
+
+      .file-item:hover {
+        background: #f8f9fa;
+      }
+
+      .file-item:last-child {
+        border-bottom: none;
+      }
+
+      .file-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .file-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+
+      .file-details h4 {
+        margin: 0;
+        color: #2c3e50;
+        font-size: 14px;
+      }
+
+      .file-details p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 12px;
+      }
+
+      .subject-tag {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .subject-tag.auto-detected {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+      }
+
+      .subject-tag.user-defined {
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+      }
+
+      .input-group {
+        margin: 10px 0;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #2c3e50;
+        font-weight: 500;
+      }
+
+      .input-group input,
+      .input-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+
+      .input-group input:focus,
+      .input-group select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .quiz-preview {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 15px 0;
+      }
+
+      .quiz-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin: 15px 0;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 5px;
+      }
+
+      .knowledge-level {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        color: white;
+      }
+
+      .knowledge-level.elementary {
+        background: #e74c3c;
+      }
+      .knowledge-level.middle-school {
+        background: #f39c12;
+      }
+      .knowledge-level.high-school {
+        background: #f1c40f;
+        color: #2c3e50;
+      }
+      .knowledge-level.college {
+        background: #27ae60;
+      }
+      .knowledge-level.graduate {
+        background: #8e44ad;
+      }
+      .knowledge-level.expert {
+        background: #2c3e50;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #ecf0f1;
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        transition: width 0.3s ease;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        color: #2c3e50;
+      }
+
+      .close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #7f8c8d;
+      }
+
+      .close:hover {
+        color: #2c3e50;
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 1001;
+        transform: translateX(400px);
+        transition: transform 0.3s ease;
+      }
+
+      .notification.show {
+        transform: translateX(0);
+      }
+
+      .notification.success {
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+      }
+
+      .notification.error {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+      }
+
+      .notification.info {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+      }
+
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .tabs {
+        display: flex;
+        border-bottom: 2px solid #ecf0f1;
+        margin-bottom: 20px;
+      }
+
+      .tab {
+        padding: 12px 24px;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.3s ease;
+        color: #7f8c8d;
+      }
+
+      .tab.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .dashboard {
+          grid-template-columns: 1fr;
+        }
+
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>🎓 Student Study AI Platform</h1>
+        <p>
+          Advanced UI Testing - File Grouping, Dynamic Quizzes & Knowledge
+          Tracking
+        </p>
+      </div>
+
+      <!-- Main Dashboard -->
+      <div class="dashboard">
+        <!-- File Management Card -->
+        <div class="card">
+          <h3>
+            <div class="icon">📁</div>
+            File Management & Grouping
+          </h3>
+
+          <div class="tabs">
+            <div class="tab active" onclick="switchTab('upload')">Upload</div>
+            <div class="tab" onclick="switchTab('manage')">Manage</div>
+            <div class="tab" onclick="switchTab('groups')">Groups</div>
+          </div>
+
+          <!-- Upload Tab -->
+          <div id="upload-tab" class="tab-content active">
+            <div class="file-upload-area" id="fileUploadArea">
+              <div style="font-size: 48px; margin-bottom: 15px">📤</div>
+              <h4>Drag & Drop Files Here</h4>
+              <p>or click to browse</p>
+              <input
+                type="file"
+                id="fileInput"
+                multiple
+                accept=".pdf,.docx,.txt,.pptx,.jpg,.png"
+                style="display: none"
+              />
+            </div>
+            <button class="btn" onclick="uploadFiles()">
+              <span id="uploadBtnText">Upload Files</span>
+              <div
+                id="uploadLoading"
+                class="loading"
+                style="display: none"
+              ></div>
+            </button>
+          </div>
+
+          <!-- Manage Tab -->
+          <div id="manage-tab" class="tab-content">
+            <div class="input-group">
+              <label>Search Files:</label>
+              <input
+                type="text"
+                id="fileSearch"
+                placeholder="Search by name, subject, or topic..."
+              />
+            </div>
+            <div class="file-list" id="fileList">
+              <div style="text-align: center; padding: 40px; color: #7f8c8d">
+                No files uploaded yet
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="loadFiles()">
+              Refresh Files
+            </button>
+          </div>
+
+          <!-- Groups Tab -->
+          <div id="groups-tab" class="tab-content">
+            <div class="input-group">
+              <label>Create New Group:</label>
+              <input type="text" id="groupName" placeholder="Group name" />
+              <input
+                type="color"
+                id="groupColor"
+                value="#3498db"
+                style="width: 60px; height: 40px; margin-left: 10px"
+              />
+            </div>
+            <button class="btn" onclick="createGroup()">Create Group</button>
+            <div id="groupsList" class="file-list">
+              <div style="text-align: center; padding: 40px; color: #7f8c8d">
+                No groups created yet
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz Generation Card -->
+        <div class="card">
+          <h3>
+            <div class="icon">🧠</div>
+            Dynamic Quiz Generation
+          </h3>
+
+          <div class="input-group">
+            <label>Quiz Prompt:</label>
+            <input
+              type="text"
+              id="quizPrompt"
+              value="Create a comprehensive quiz about the uploaded materials"
+              placeholder="Describe what kind of quiz you want..."
+            />
+          </div>
+
+          <div class="grid-2">
+            <div class="input-group">
+              <label>Knowledge Level:</label>
+              <select id="knowledgeLevel">
+                <option value="auto">Auto-detect</option>
+                <option value="elementary">Elementary (K-5)</option>
+                <option value="middle-school">Middle School (6-8)</option>
+                <option value="high-school">High School (9-12)</option>
+                <option value="college">College</option>
+                <option value="graduate">Graduate</option>
+                <option value="expert">Expert</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Quiz Length:</label>
+              <select id="quizLength">
+                <option value="auto">Auto-calculate</option>
+                <option value="quick">Quick (3-8 questions)</option>
+                <option value="standard">Standard (8-20 questions)</option>
+                <option value="comprehensive">
+                  Comprehensive (20-50 questions)
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn" onclick="generateQuiz()">
+            <span id="quizBtnText">Generate Quiz</span>
+            <div id="quizLoading" class="loading" style="display: none"></div>
+          </button>
+
+          <div id="quizPreview" class="quiz-preview" style="display: none">
+            <h4>Quiz Preview</h4>
+            <div class="quiz-stats" id="quizStats"></div>
+            <div id="quizQuestions"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Knowledge Analytics Dashboard -->
+      <div class="card">
+        <h3>
+          <div class="icon">📊</div>
+          Knowledge Analytics & Progress
+        </h3>
+
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('analytics')">
+            Analytics
+          </div>
+          <div class="tab" onclick="switchTab('progress')">Progress</div>
+          <div class="tab" onclick="switchTab('preferences')">Preferences</div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content active">
+          <div class="grid-3" id="analyticsGrid">
+            <div class="stat-card">
+              <div class="stat-value" id="totalFiles">0</div>
+              <div class="stat-label">Files Uploaded</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="totalQuizzes">0</div>
+              <div class="stat-label">Quizzes Generated</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="avgScore">0%</div>
+              <div class="stat-label">Average Score</div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadAnalytics()">
+            Refresh Analytics
+          </button>
+        </div>
+
+        <!-- Progress Tab -->
+        <div id="progress-tab" class="tab-content">
+          <div id="knowledgeLevels">
+            <h4>Knowledge Levels by Subject</h4>
+            <div id="subjectProgress"></div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadProgress()">
+            Refresh Progress
+          </button>
+        </div>
+
+        <!-- Preferences Tab -->
+        <div id="preferences-tab" class="tab-content">
+          <div class="grid-2">
+            <div class="input-group">
+              <label>Preferred Quiz Length:</label>
+              <select id="prefQuizLength">
+                <option value="quick">Quick</option>
+                <option value="standard" selected>Standard</option>
+                <option value="comprehensive">Comprehensive</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Study Style:</label>
+              <select id="prefStudyStyle">
+                <option value="visual">Visual</option>
+                <option value="auditory">Auditory</option>
+                <option value="kinesthetic">Kinesthetic</option>
+                <option value="balanced" selected>Balanced</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn" onclick="savePreferences()">
+            Save Preferences
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Edit Modal -->
+    <div id="fileEditModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Edit File Details</h3>
+          <button class="close" onclick="closeModal('fileEditModal')">
+            &times;
+          </button>
+        </div>
+        <div id="fileEditForm">
+          <!-- Form will be populated dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script>
+      const API_BASE = "http://localhost:5000/api";
+      let currentFiles = [];
+      let currentGroups = [];
+      let currentAnalytics = null;
+
+      // Initialize the application
+      window.addEventListener("load", () => {
+        initializeApp();
+      });
+
+      async function initializeApp() {
+        showNotification("Loading application...", "info");
+        await loadFiles();
+        await loadGroups();
+        await loadAnalytics();
+        showNotification("Application loaded successfully!", "success");
+      }
+
+      // Tab switching
+      function switchTab(tabName) {
+        // Remove active class from all tabs and content
+        document
+          .querySelectorAll(".tab")
+          .forEach((tab) => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((content) => content.classList.remove("active"));
+
+        // Add active class to clicked tab and corresponding content
+        event.target.classList.add("active");
+        document.getElementById(tabName + "-tab").classList.add("active");
+      }
+
+      // File upload functionality
+      const fileUploadArea = document.getElementById("fileUploadArea");
+      const fileInput = document.getElementById("fileInput");
+
+      fileUploadArea.addEventListener("click", () => fileInput.click());
+      fileUploadArea.addEventListener("dragover", handleDragOver);
+      fileUploadArea.addEventListener("dragleave", handleDragLeave);
+      fileUploadArea.addEventListener("drop", handleDrop);
+      fileInput.addEventListener("change", handleFileSelect);
+
+      function handleDragOver(e) {
+        e.preventDefault();
+        fileUploadArea.classList.add("dragover");
+      }
+
+      function handleDragLeave(e) {
+        e.preventDefault();
+        fileUploadArea.classList.remove("dragover");
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        fileUploadArea.classList.remove("dragover");
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+      }
+
+      function handleFileSelect(e) {
+        const files = e.target.files;
+        handleFiles(files);
+      }
+
+      function handleFiles(files) {
+        if (files.length > 0) {
+          uploadFiles(files);
+        }
+      }
+
+      async function uploadFiles(files = null) {
+        const fileInput = document.getElementById("fileInput");
+        const filesToUpload = files || fileInput.files;
+
+        if (filesToUpload.length === 0) {
+          showNotification("Please select files to upload", "error");
+          return;
+        }
+
+        const uploadBtn = document.getElementById("uploadBtnText");
+        const uploadLoading = document.getElementById("uploadLoading");
+
+        uploadBtn.style.display = "none";
+        uploadLoading.style.display = "inline-block";
+
+        const formData = new FormData();
+        for (let file of filesToUpload) {
+          formData.append("files", file);
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/files/upload`, {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification(
+              `Successfully uploaded ${result.data.length} files!`,
+              "success"
+            );
+            await loadFiles();
+            await loadAnalytics();
+          } else {
+            showNotification(`Upload failed: ${result.message}`, "error");
+          }
+        } catch (error) {
+          showNotification(`Upload error: ${error.message}`, "error");
+        } finally {
+          uploadBtn.style.display = "inline";
+          uploadLoading.style.display = "none";
+        }
+      }
+
+      // File management
+      async function loadFiles() {
+        try {
+          const response = await fetch(`${API_BASE}/files/1/grouped`);
+          const result = await response.json();
+
+          if (response.ok) {
+            currentFiles = Object.values(result.data.filesBySubject)
+              .flat()
+              .concat(result.data.ungroupedFiles);
+            displayFiles(currentFiles);
+          } else {
+            showNotification("Failed to load files", "error");
+          }
+        } catch (error) {
+          showNotification(`Error loading files: ${error.message}`, "error");
+        }
+      }
+
+      function displayFiles(files) {
+        const fileList = document.getElementById("fileList");
+
+        if (files.length === 0) {
+          fileList.innerHTML =
+            '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No files uploaded yet</div>';
+          return;
+        }
+
+        fileList.innerHTML = files
+          .map(
+            (file) => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">${getFileIcon(
+                          file.fileType
+                        )}</div>
+                        <div class="file-details">
+                            <h4>${file.fileName}</h4>
+                            <p>${file.fileType} • ${formatFileSize(
+              file.fileSize
+            )}</p>
+                            <div style="margin-top: 5px;">
+                                ${
+                                  file.userDefinedSubject
+                                    ? `<span class="subject-tag user-defined">${file.userDefinedSubject}</span>`
+                                    : file.autoDetectedSubject
+                                    ? `<span class="subject-tag auto-detected">${file.autoDetectedSubject}</span>`
+                                    : `<span class="subject-tag">Ungrouped</span>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="editFile(${
+                          file.id
+                        })">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteFile(${
+                          file.id
+                        })">Delete</button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      function getFileIcon(fileType) {
+        const icons = {
+          pdf: "📄",
+          docx: "📝",
+          txt: "📄",
+          pptx: "📊",
+          jpg: "🖼️",
+          png: "🖼️",
+        };
+        return icons[fileType.toLowerCase()] || "📁";
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB", "GB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      }
+
+      // Group management
+      async function loadGroups() {
+        try {
+          const response = await fetch(`${API_BASE}/files/groups?userId=1`);
+          const result = await response.json();
+
+          if (response.ok) {
+            currentGroups = result.data;
+            displayGroups(currentGroups);
+          } else {
+            showNotification("Failed to load groups", "error");
+          }
+        } catch (error) {
+          showNotification(`Error loading groups: ${error.message}`, "error");
+        }
+      }
+
+      function displayGroups(groups) {
+        const groupsList = document.getElementById("groupsList");
+
+        if (groups.length === 0) {
+          groupsList.innerHTML =
+            '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No groups created yet</div>';
+          return;
+        }
+
+        groupsList.innerHTML = groups
+          .map(
+            (group) => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon" style="background: ${
+                          group.color
+                        };">📁</div>
+                        <div class="file-details">
+                            <h4>${group.groupName}</h4>
+                            <p>${group.description || "No description"}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary" onclick="editGroup(${
+                          group.id
+                        })">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteGroup(${
+                          group.id
+                        })">Delete</button>
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      async function createGroup() {
+        const groupName = document.getElementById("groupName").value;
+        const groupColor = document.getElementById("groupColor").value;
+
+        if (!groupName.trim()) {
+          showNotification("Please enter a group name", "error");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE}/files/groups`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              groupName: groupName,
+              description: "Created via Advanced UI",
+              color: groupColor,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification("Group created successfully!", "success");
+            document.getElementById("groupName").value = "";
+            await loadGroups();
+          } else {
+            showNotification(
+              `Failed to create group: ${result.message}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showNotification(`Error creating group: ${error.message}`, "error");
+        }
+      }
+
+      // Quiz generation
+      async function generateQuiz() {
+        const prompt = document.getElementById("quizPrompt").value;
+        const knowledgeLevel = document.getElementById("knowledgeLevel").value;
+        const quizLength = document.getElementById("quizLength").value;
+
+        if (!prompt.trim()) {
+          showNotification("Please enter a quiz prompt", "error");
+          return;
+        }
+
+        const quizBtn = document.getElementById("quizBtnText");
+        const quizLoading = document.getElementById("quizLoading");
+
+        quizBtn.style.display = "none";
+        quizLoading.style.display = "inline-block";
+
+        try {
+          const response = await fetch(`${API_BASE}/analysis/generate-quiz`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userPrompt: prompt,
+              userId: 1,
+              knowledgeLevel: knowledgeLevel,
+              quizLength: quizLength,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification("Quiz generated successfully!", "success");
+            displayQuizPreview(result.data);
+          } else {
+            showNotification(
+              `Quiz generation failed: ${result.message}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showNotification(`Error generating quiz: ${error.message}`, "error");
+        } finally {
+          quizBtn.style.display = "inline";
+          quizLoading.style.display = "none";
+        }
+      }
+
+      function displayQuizPreview(quiz) {
+        const quizPreview = document.getElementById("quizPreview");
+        const quizStats = document.getElementById("quizStats");
+        const quizQuestions = document.getElementById("quizQuestions");
+
+        const questions = JSON.parse(quiz.questions || "[]");
+
+        quizStats.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${questions.length}</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${quiz.subject || "N/A"}</div>
+                    <div class="stat-label">Subject</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${quiz.topic || "N/A"}</div>
+                    <div class="stat-label">Topic</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${quiz.level || "N/A"}</div>
+                    <div class="stat-label">Level</div>
+                </div>
+            `;
+
+        quizQuestions.innerHTML = questions
+          .slice(0, 3)
+          .map(
+            (q, i) => `
+                <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 8px;">
+                    <h5>Question ${i + 1}:</h5>
+                    <p>${q.question}</p>
+                    <div style="margin-top: 10px;">
+                        ${q.options
+                          .map(
+                            (option, j) => `
+                            <div style="padding: 5px 0; color: ${
+                              j === q.correctAnswerIndex ? "#27ae60" : "#7f8c8d"
+                            };">
+                                ${String.fromCharCode(65 + j)}. ${option}
+                            </div>
+                        `
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `
+          )
+          .join("");
+
+        quizPreview.style.display = "block";
+      }
+
+      // Analytics
+      async function loadAnalytics() {
+        try {
+          const response = await fetch(`${API_BASE}/knowledge/1/analytics`);
+          const result = await response.json();
+
+          if (response.ok) {
+            currentAnalytics = result.data;
+            displayAnalytics(currentAnalytics);
+          } else {
+            showNotification("Failed to load analytics", "error");
+          }
+        } catch (error) {
+          showNotification(
+            `Error loading analytics: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      function displayAnalytics(analytics) {
+        document.getElementById("totalFiles").textContent = currentFiles.length;
+        document.getElementById("totalQuizzes").textContent =
+          analytics.recentPerformance?.length || 0;
+
+        const avgScore =
+          analytics.recentPerformance?.length > 0
+            ? Math.round(
+                analytics.recentPerformance.reduce(
+                  (sum, p) => sum + (p.score || 0),
+                  0
+                ) / analytics.recentPerformance.length
+              )
+            : 0;
+        document.getElementById("avgScore").textContent = avgScore + "%";
+      }
+
+      async function loadProgress() {
+        try {
+          const response = await fetch(`${API_BASE}/knowledge/1/analytics`);
+          const result = await response.json();
+
+          if (response.ok) {
+            displayProgress(result.data);
+          } else {
+            showNotification("Failed to load progress", "error");
+          }
+        } catch (error) {
+          showNotification(`Error loading progress: ${error.message}`, "error");
+        }
+      }
+
+      function displayProgress(analytics) {
+        const subjectProgress = document.getElementById("subjectProgress");
+
+        if (
+          analytics.subjectProfiles &&
+          Object.keys(analytics.subjectProfiles).length > 0
+        ) {
+          subjectProgress.innerHTML = Object.entries(analytics.subjectProfiles)
+            .map(
+              ([subject, profile]) => `
+                    <div style="margin: 15px 0; padding: 15px; background: white; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h5>${subject}</h5>
+                            <span class="knowledge-level ${getKnowledgeLevelClass(
+                              profile.knowledgeLevel
+                            )}">
+                                ${getKnowledgeLevelName(profile.knowledgeLevel)}
+                            </span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${
+                              profile.confidenceScore * 100
+                            }%"></div>
+                        </div>
+                        <p style="margin-top: 5px; font-size: 12px; color: #7f8c8d;">
+                            Confidence: ${Math.round(
+                              profile.confidenceScore * 100
+                            )}%
+                        </p>
+                    </div>
+                `
+            )
+            .join("");
+        } else {
+          subjectProgress.innerHTML =
+            '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No knowledge profiles yet</div>';
+        }
+      }
+
+      function getKnowledgeLevelClass(level) {
+        const classes = [
+          "elementary",
+          "middle-school",
+          "high-school",
+          "college",
+          "graduate",
+          "expert",
+        ];
+        return classes[level - 1] || "high-school";
+      }
+
+      function getKnowledgeLevelName(level) {
+        const names = [
+          "Elementary",
+          "Middle School",
+          "High School",
+          "College",
+          "Graduate",
+          "Expert",
+        ];
+        return names[level - 1] || "High School";
+      }
+
+      // Preferences
+      async function savePreferences() {
+        try {
+          const response = await fetch(`${API_BASE}/knowledge/1/preferences`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              preferredQuizLength:
+                document.getElementById("prefQuizLength").value,
+              studyStyle: document.getElementById("prefStudyStyle").value,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            showNotification("Preferences saved successfully!", "success");
+          } else {
+            showNotification(
+              `Failed to save preferences: ${result.message}`,
+              "error"
+            );
+          }
+        } catch (error) {
+          showNotification(
+            `Error saving preferences: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      // Modal functions
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      // Notification system
+      function showNotification(message, type = "info") {
+        const container = document.getElementById("notificationContainer");
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        container.appendChild(notification);
+
+        // Trigger animation
+        setTimeout(() => notification.classList.add("show"), 100);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+          notification.classList.remove("show");
+          setTimeout(() => container.removeChild(notification), 300);
+        }, 3000);
+      }
+
+      // Placeholder functions for future implementation
+      function editFile(fileId) {
+        showNotification("File editing feature coming soon!", "info");
+      }
+
+      function deleteFile(fileId) {
+        if (confirm("Are you sure you want to delete this file?")) {
+          showNotification("File deletion feature coming soon!", "info");
+        }
+      }
+
+      function editGroup(groupId) {
+        showNotification("Group editing feature coming soon!", "info");
+      }
+
+      function deleteGroup(groupId) {
+        if (confirm("Are you sure you want to delete this group?")) {
+          showNotification("Group deletion feature coming soon!", "info");
+        }
+      }
+    </script>
+  </body>
+</html>

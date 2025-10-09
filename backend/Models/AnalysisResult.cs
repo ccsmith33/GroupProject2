@@ -11,6 +11,13 @@ namespace StudentStudyAI.Models
         public string Feedback { get; set; } = string.Empty; // JSON string
         public string StudyPlan { get; set; } = string.Empty; // JSON string
         public double Confidence { get; set; }
+        
+        // New properties for context management
+        public int? UserId { get; set; }
+        public int? FileUploadId { get; set; }
+        public string? Subject { get; set; }
+        public string? Topic { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         // Helper properties for working with the JSON data
         public Feedback? FeedbackData 

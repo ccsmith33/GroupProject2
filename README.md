@@ -10,6 +10,8 @@ An AI-powered study platform that analyzes uploaded files and provides personali
 - **MySQL 8.0.37** - [Download here](https://dev.mysql.com/downloads/mysql/)
 - **MySQL Workbench** (Optional) - [Download here](https://dev.mysql.com/downloads/workbench/)
 
+> **Note**: Docker is not required for this project. We use direct MySQL installation for simplicity.
+
 ### Setup Instructions
 
 #### 1. Clone the Repository
@@ -21,9 +23,28 @@ cd "MIS 321 Group Project 2"
 
 #### 2. Install MySQL
 
-- Download MySQL 8.0.37 for Windows
-- Install and set a root password (remember this!)
-- Start MySQL service
+**Option A: Using winget (Recommended)**
+
+```powershell
+winget install Oracle.MySQL
+```
+
+**Option B: Manual Installation**
+
+- Download MySQL 8.0.37 for Windows from [mysql.com](https://dev.mysql.com/downloads/mysql/)
+- Run installer as Administrator
+- Set root password during installation (remember this!)
+- MySQL service starts automatically
+
+**Verify Installation:**
+
+```powershell
+# Check if MySQL is running
+Get-Service -Name "MySQL*"
+
+# Test connection
+mysql -u root -p
+```
 
 #### 3. Configure Database
 
@@ -136,9 +157,24 @@ Error: Unable to connect to any of the specified MySQL hosts
 
 **Solution**:
 
-1. Ensure MySQL is running: `Get-Process | Where-Object {$_.ProcessName -eq "mysqld"}`
-2. Check password in `appsettings.json`
-3. Verify port 3306 is open
+1. Check if MySQL service is running:
+
+   ```powershell
+   Get-Service -Name "MySQL*"
+   # If not running: Start-Service -Name "MySQL80"
+   ```
+
+2. Verify MySQL is listening on port 3306:
+
+   ```powershell
+   netstat -an | findstr :3306
+   ```
+
+3. Check password in `appsettings.json`
+4. Test connection manually:
+   ```powershell
+   mysql -u root -p
+   ```
 
 #### Database Not Found
 
