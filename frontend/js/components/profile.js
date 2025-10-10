@@ -16,109 +16,111 @@ class Profile {
 
   render() {
     this.container.innerHTML = `
-      <div class="row">
-        <div class="col-12">
-          <h1>Profile</h1>
-          <p class="lead">Manage your account and view your study history</p>
+      <div class="profile-container">
+        <!-- Profile Hero Section -->
+        <div class="profile-hero">
+          <div class="profile-hero-content">
+            <h1 class="profile-title">Your Study Profile</h1>
+            <p class="profile-subtitle">Track your progress and manage your learning journey</p>
+            <p class="profile-tagline">Your data, your success story</p>
+          </div>
         </div>
-      </div>
 
-      <!-- User Information -->
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h5>Account Information</h5>
+        <!-- User Stats Section -->
+        <div class="profile-stats-section">
+          <h2 class="section-title">📊 Your Statistics</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🎯</div>
+              <div class="stat-number" id="totalSessions">0</div>
+              <div class="stat-label">Study Sessions</div>
             </div>
-            <div class="card-body">
-              <div id="userInfo">
-                <p class="text-muted">Please log in to view your profile information.</p>
-              </div>
+            <div class="stat-card">
+              <div class="stat-icon">📚</div>
+              <div class="stat-number" id="totalFiles">0</div>
+              <div class="stat-label">Files Analyzed</div>
             </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h5>Account Settings</h5>
+            <div class="stat-card">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-number" id="avgScore">0</div>
+              <div class="stat-label">Average Score</div>
             </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label for="profileName" class="form-label">Full Name</label>
-                <input type="text" class="form-control" id="profileName" disabled>
-              </div>
-              <div class="mb-3">
-                <label for="profileEmail" class="form-label">Email</label>
-                <input type="email" class="form-control" id="profileEmail" disabled>
-              </div>
-              <div class="mb-3">
-                <label for="profileSchool" class="form-label">School</label>
-                <input type="text" class="form-control" id="profileSchool" disabled>
-              </div>
-              <button class="btn btn-primary" id="editProfileBtn" disabled>Edit Profile</button>
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div class="stat-number" id="improvement">0%</div>
+              <div class="stat-label">Improvement</div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Study Statistics -->
-      <div class="row mt-4" id="studyStats">
-        <div class="col-md-3">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title text-primary" id="totalSessions">0</h5>
-              <p class="card-text">Study Sessions</p>
+        <!-- Profile Information Section -->
+        <div class="profile-info-section">
+          <div class="profile-info-grid">
+            <!-- Account Information -->
+            <div class="account-info-section">
+              <div class="account-card">
+                <h3 class="section-title">👤 Account Information</h3>
+                <div class="account-info" id="userInfo">
+                  <div class="info-placeholder">
+                    <div class="placeholder-icon">🔒</div>
+                    <h4>Please log in to view your profile</h4>
+                    <p>Sign in to access your personalized dashboard and study history</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title text-success" id="totalFiles">0</h5>
-              <p class="card-text">Files Analyzed</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title text-info" id="avgScore">0</h5>
-              <p class="card-text">Average Score</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="card text-center">
-            <div class="card-body">
-              <h5 class="card-title text-warning" id="improvement">0%</h5>
-              <p class="card-text">Improvement</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Recent Activity -->
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h5>Recent Study Sessions</h5>
-            </div>
-            <div class="card-body">
-              <div id="recentSessions">
-                <p class="text-muted">No recent sessions</p>
+            <!-- Account Settings -->
+            <div class="settings-section">
+              <div class="settings-card">
+                <h3 class="section-title">⚙️ Account Settings</h3>
+                <div class="settings-form">
+                  <div class="form-group">
+                    <label for="profileName" class="form-label">👤 Full Name</label>
+                    <input type="text" class="form-input" id="profileName" disabled>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileEmail" class="form-label">📧 Email</label>
+                    <input type="email" class="form-input" id="profileEmail" disabled>
+                  </div>
+                  <div class="form-group">
+                    <label for="profileSchool" class="form-label">🏫 School</label>
+                    <input type="text" class="form-input" id="profileSchool" disabled>
+                  </div>
+                  <button class="edit-button" id="editProfileBtn" disabled>
+                    <span class="button-icon">✏️</span>
+                    <span class="button-text">Edit Profile</span>
+                    <div class="button-shine"></div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-header">
-              <h5>Recent Files</h5>
+
+        <!-- Recent Activity Section -->
+        <div class="recent-activity-section">
+          <h2 class="section-title">📋 Recent Activity</h2>
+          <div class="activity-grid">
+            <div class="activity-card">
+              <h3 class="card-title">🎓 Recent Study Sessions</h3>
+              <div class="activity-content" id="recentSessions">
+                <div class="activity-placeholder">
+                  <div class="placeholder-icon">📖</div>
+                  <p>No recent study sessions</p>
+                  <small>Start studying to see your activity here</small>
+                </div>
+              </div>
             </div>
-            <div class="card-body">
-              <div id="recentFilesList">
-                <p class="text-muted">No recent files</p>
+            
+            <div class="activity-card">
+              <h3 class="card-title">📄 Recent Files</h3>
+              <div class="activity-content" id="recentFilesList">
+                <div class="activity-placeholder">
+                  <div class="placeholder-icon">📁</div>
+                  <p>No recent files</p>
+                  <small>Upload documents to see them here</small>
+                </div>
               </div>
             </div>
           </div>

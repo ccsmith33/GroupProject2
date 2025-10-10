@@ -14,13 +14,15 @@ class Header {
 
   render() {
     this.container.innerHTML = `
-      <nav class="navbar navbar-expand-lg navbar-dark">
+      <nav class="navbar navbar-expand-lg navbar-light studyspree-navbar">
         <div class="container">
-          <a class="navbar-brand" href="#">Data Driven Studying</a>
+          <a class="navbar-brand" href="#" id="homeTab">StudySpree</a>
           
           <!-- Centralized Navigation Tabs -->
           <div class="navbar-nav mx-auto">
-            <a class="nav-link" href="#" id="studyTab">Study</a>
+            <a class="nav-link" href="#" id="homeNavTab">Home</a>
+            <a class="nav-link" href="#" id="aboutTab">About</a>
+            <a class="nav-link" href="#" id="studyTab">Study Aids</a>
             <a class="nav-link" href="#" id="uploadTab">Upload Documents</a>
             <a class="nav-link" href="#" id="profileTab">Profile</a>
           </div>
@@ -170,6 +172,30 @@ class Header {
 
   setupEventListeners() {
     // Navigation tab events
+    const homeTab = document.getElementById("homeTab");
+    if (homeTab) {
+      homeTab.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleTabClick("home");
+      });
+    }
+
+    const homeNavTab = document.getElementById("homeNavTab");
+    if (homeNavTab) {
+      homeNavTab.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleTabClick("home");
+      });
+    }
+
+    const aboutTab = document.getElementById("aboutTab");
+    if (aboutTab) {
+      aboutTab.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.handleTabClick("about");
+      });
+    }
+
     const studyTab = document.getElementById("studyTab");
     if (studyTab) {
       studyTab.addEventListener("click", (e) => {
@@ -252,10 +278,10 @@ class Header {
 
   // Set initial active tab
   setInitialActiveTab() {
-    // Set Study tab as active by default
-    const studyTab = document.getElementById("studyTab");
-    if (studyTab) {
-      studyTab.classList.add('active');
+    // Set Home tab as active by default
+    const homeTab = document.getElementById("homeNavTab");
+    if (homeTab) {
+      homeTab.classList.add('active');
     }
   }
 

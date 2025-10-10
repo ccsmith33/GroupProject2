@@ -25,66 +25,109 @@ class FileUpload {
 
   render() {
     this.container.innerHTML = `
-      <div class="row mt-4">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-header">
-              <h5>Upload Study Materials</h5>
-            </div>
-            <div class="card-body">
-              <div id="fileUploadArea" class="upload-area">
-                <div class="upload-content">
-                  <i class="fas fa-cloud-upload-alt fa-3x text-muted"></i>
-                  <p>Drag and drop files here or click to browse</p>
-                  <p class="text-muted small">Supports PDF, Word, PowerPoint, images, and text files</p>
-                </div>
-                <input type="file" id="fileInput" multiple accept=".pdf,.docx,.pptx,.txt,.jpg,.jpeg,.png" style="display: none;">
-              </div>
-              
-              <!-- Upload Progress -->
-              <div id="uploadProgress" class="mt-3" style="display: none;">
-                <div class="progress">
-                  <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                </div>
-                <small class="text-muted">Uploading...</small>
-              </div>
+      <div class="file-upload-container">
+        <!-- Upload Hero Section -->
+        <div class="upload-hero">
+          <div class="upload-hero-content">
+            <h1 class="upload-title">Upload Your Study Materials</h1>
+            <p class="upload-subtitle">Transform your documents into personalized study guides with AI</p>
+            <p class="upload-tagline">Drag, drop, and discover your learning potential</p>
+          </div>
+        </div>
 
-              <!-- File List -->
-              <div id="fileList" class="mt-3"></div>
+        <!-- Main Upload Section -->
+        <div class="upload-main-section">
+          <div class="upload-main-grid">
+            <!-- Upload Area -->
+            <div class="upload-area-section">
+              <div class="upload-card">
+                <h3 class="section-title">📤 Upload Files</h3>
+                <div id="fileUploadArea" class="upload-area">
+                  <div class="upload-content">
+                    <div class="upload-icon">☁️</div>
+                    <h4 class="upload-text">Drag & Drop Files Here</h4>
+                    <p class="upload-description">or click to browse your device</p>
+                    <p class="upload-formats">Supports: PDF, Word, PowerPoint, Images, Text</p>
+                  </div>
+                  <input type="file" id="fileInput" multiple accept=".pdf,.docx,.pptx,.txt,.jpg,.jpeg,.png" style="display: none;">
+                </div>
+                
+                <!-- Upload Progress -->
+                <div id="uploadProgress" class="upload-progress" style="display: none;">
+                  <div class="progress-bar-container">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                  </div>
+                  <p class="progress-text">Uploading your files...</p>
+                </div>
+
+                <!-- File List -->
+                <div id="fileList" class="file-list"></div>
+              </div>
+            </div>
+
+            <!-- Analysis Settings -->
+            <div class="analysis-settings-section">
+              <div class="analysis-card">
+                <h3 class="section-title">⚙️ Analysis Settings</h3>
+                <div class="settings-form">
+                  <div class="form-group">
+                    <label for="subjectSelect" class="form-label">📚 Subject</label>
+                    <select class="form-select" id="subjectSelect">
+                      <option value="mathematics">Mathematics</option>
+                      <option value="physics">Physics</option>
+                      <option value="chemistry">Chemistry</option>
+                      <option value="biology">Biology</option>
+                      <option value="english">English</option>
+                      <option value="history">History</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="levelSelect" class="form-label">🎓 Student Level</label>
+                    <select class="form-select" id="levelSelect">
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate" selected>Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                  
+                  <button id="analyzeBtn" class="analyze-button" disabled>
+                    <span class="button-icon">🤖</span>
+                    <span class="button-text">Analyze Materials</span>
+                    <div class="button-shine"></div>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Analysis Settings -->
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-header">
-              <h5>Analysis Settings</h5>
+        <!-- Features Section -->
+        <div class="upload-features-section">
+          <h2 class="section-title">What You'll Get</h2>
+          <p class="features-subtitle">Transform your study materials into powerful learning tools</p>
+          <div class="features-grid">
+            <div class="feature-item">
+              <div class="feature-content">
+                <div class="feature-icon">📖</div>
+                <h4 class="feature-title">Smart Study Guides</h4>
+                <p class="feature-description">AI-generated summaries and key points tailored to your learning style</p>
+              </div>
             </div>
-            <div class="card-body">
-              <div class="mb-3">
-                <label for="subjectSelect" class="form-label">Subject</label>
-                <select class="form-select" id="subjectSelect">
-                  <option value="mathematics">Mathematics</option>
-                  <option value="physics">Physics</option>
-                  <option value="chemistry">Chemistry</option>
-                  <option value="biology">Biology</option>
-                  <option value="english">English</option>
-                  <option value="history">History</option>
-                  <option value="other">Other</option>
-                </select>
+            <div class="feature-item">
+              <div class="feature-content">
+                <div class="feature-icon">🎯</div>
+                <h4 class="feature-title">Personalized Quizzes</h4>
+                <p class="feature-description">Custom questions and assessments based on your uploaded materials</p>
               </div>
-              <div class="mb-3">
-                <label for="levelSelect" class="form-label">Student Level</label>
-                <select class="form-select" id="levelSelect">
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate" selected>Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
+            </div>
+            <div class="feature-item">
+              <div class="feature-content">
+                <div class="feature-icon">📊</div>
+                <h4 class="feature-title">Progress Tracking</h4>
+                <p class="feature-description">Monitor your learning journey with detailed analytics and insights</p>
               </div>
-              <button id="analyzeBtn" class="btn btn-primary w-100" disabled>
-                <i class="fas fa-brain"></i> Analyze Materials
-              </button>
             </div>
           </div>
         </div>
