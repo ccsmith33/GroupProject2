@@ -1,4 +1,15 @@
 // Main App component that handles the overall application structure
+import Header from "./header.js";
+import LandingPage from "./landing.js";
+import AboutPage from "./about.js";
+import Dashboard from "./dashboard.js";
+import FileUpload from "./fileUpload.js";
+import Analysis from "./analysis.js";
+import Study from "./study.js";
+import Profile from "./profile.js";
+import { store, initializeFromStorage } from "../state/store.js";
+import { authState } from "../state/auth-state.js";
+
 class App {
   constructor() {
     this.container = document.createElement("div");
@@ -6,8 +17,12 @@ class App {
     this.init();
   }
 
-  init() {
+  async init() {
     this.render();
+
+    // Initialize authentication state first
+    await this.initializeAuth();
+
     // Wait for DOM to be ready before initializing components
     setTimeout(() => {
       this.initializeComponents();
@@ -15,40 +30,92 @@ class App {
   }
 
   render() {
+    // Get current state to determine initial view
+    const state = store.getState();
+    const isAuthenticated = state.isAuthenticated && !state.isGuest;
+
     this.container.innerHTML = `
-      <div class="container-fluid">
-        <div id="app-header"></div>
-        <div id="app-landing" style="display: block;"></div>
-        <div id="app-about" style="display: none;"></div>
-        <div id="app-dashboard" class="dashboard-container" style="display: none;"></div>
-        <div id="app-file-upload" class="file-upload-container" style="display: none;"></div>
-        <div id="app-profile" class="profile-container" style="display: none;"></div>
-        <div class="container mt-4">
-          <div id="app-analysis" style="display: none;"></div>
-        </div>
+      <div id="app-header"></div>
+      <div id="app-landing" style="display: ${
+        isAuthenticated ? "none" : "block"
+      };"></div>
+      <div id="app-about" style="display: none;"></div>
+      <div id="app-dashboard" class="dashboard-container" style="display: ${
+        isAuthenticated ? "block" : "none"
+      };"></div>
+      <div id="app-file-upload" class="file-upload-container" style="display: none;"></div>
+      <div id="app-study" class="study-container" style="display: none;"></div>
+      <div id="app-profile" class="profile-container" style="display: none;"></div>
+      <div class="container mt-4">
+        <div id="app-analysis" style="display: none;"></div>
       </div>
     `;
+  }
+
+  async initializeAuth() {
+    try {
+      console.log("🔐 Initializing authentication...");
+
+      // Initialize store from storage first
+      await initializeFromStorage();
+      console.log("📦 Store initialized from storage");
+
+      // Initialize authentication state from storage
+      await authState.initialize();
+      console.log("🔑 Auth state initialized");
+
+      // Get current state
+      const state = store.getState();
+      console.log(
+        "👤 Auth initialized. User authenticated:",
+        state.isAuthenticated
+      );
+      console.log("👤 Is guest:", state.isGuest);
+      console.log("👤 User:", state.user);
+
+      // If user is authenticated, show dashboard instead of landing
+      if (state.isAuthenticated && !state.isGuest) {
+        console.log("✅ User is authenticated, showing dashboard");
+        // Update the initial view to dashboard
+        store.setState({ currentView: "dashboard" });
+      } else {
+        console.log("❌ User is not authenticated, showing landing page");
+      }
+    } catch (error) {
+      console.error("❌ Error initializing auth:", error);
+    }
   }
 
   initializeComponents() {
     try {
       // Initialize components
-      this.components.header = new Header(document.getElementById("app-header"));
-      
+      this.components.header = new Header(
+        document.getElementById("app-header")
+      );
+
       const landingContainer = document.getElementById("app-landing");
       if (landingContainer) {
         this.components.landing = new LandingPage(landingContainer);
       }
-      
+
       const aboutContainer = document.getElementById("app-about");
       if (aboutContainer) {
         this.components.about = new AboutPage(aboutContainer);
       }
-      
-      this.components.dashboard = new Dashboard(document.getElementById("app-dashboard"));
-      this.components.fileUpload = new FileUpload(document.getElementById("app-file-upload"));
-      this.components.analysis = new Analysis(document.getElementById("app-analysis"));
-      this.components.profile = new Profile(document.getElementById("app-profile"));
+
+      this.components.dashboard = new Dashboard(
+        document.getElementById("app-dashboard")
+      );
+      this.components.fileUpload = new FileUpload(
+        document.getElementById("app-file-upload")
+      );
+      this.components.study = new Study(document.getElementById("app-study"));
+      this.components.analysis = new Analysis(
+        document.getElementById("app-analysis")
+      );
+      this.components.profile = new Profile(
+        document.getElementById("app-profile")
+      );
 
       // Setup component communication
       this.setupComponentCommunication();
@@ -95,43 +162,57 @@ class App {
   }
 
   handleTabChange(activeTab) {
+    console.log("handleTabChange called with:", activeTab);
+
     // Hide all sections
-    const sections = ['app-landing', 'app-about', 'app-dashboard', 'app-file-upload', 'app-analysis', 'app-profile'];
-    sections.forEach(sectionId => {
+    const sections = [
+      "app-landing",
+      "app-about",
+      "app-dashboard",
+      "app-file-upload",
+      "app-study",
+      "app-analysis",
+      "app-profile",
+    ];
+    sections.forEach((sectionId) => {
       const section = document.getElementById(sectionId);
       if (section) {
-        section.style.display = 'none';
+        section.style.display = "none";
       }
     });
 
     // Show the active section
     let activeSectionId;
-    switch(activeTab) {
-      case 'home':
-        activeSectionId = 'app-landing';
+    switch (activeTab) {
+      case "home":
+        activeSectionId = "app-landing";
         break;
-      case 'about':
-        activeSectionId = 'app-about';
+      case "about":
+        activeSectionId = "app-about";
         break;
-      case 'study':
-        activeSectionId = 'app-dashboard';
+      case "study":
+        activeSectionId = "app-study";
         break;
-      case 'upload':
-        activeSectionId = 'app-file-upload';
+      case "upload":
+        activeSectionId = "app-file-upload";
         break;
-      case 'analysis':
-        activeSectionId = 'app-analysis';
+      case "analysis":
+        activeSectionId = "app-analysis";
         break;
-      case 'profile':
-        activeSectionId = 'app-profile';
+      case "profile":
+        activeSectionId = "app-profile";
         break;
       default:
-        activeSectionId = 'app-landing';
+        activeSectionId = "app-landing";
     }
 
+    console.log("Switching to section:", activeSectionId);
     const activeSection = document.getElementById(activeSectionId);
     if (activeSection) {
-      activeSection.style.display = 'block';
+      activeSection.style.display = "block";
+      console.log("Section displayed:", activeSectionId);
+    } else {
+      console.error("Section not found:", activeSectionId);
     }
 
     // Scroll to top when switching tabs
@@ -141,7 +222,7 @@ class App {
   switchToTab(tabName) {
     // Trigger tab change through header
     const event = new CustomEvent("tabChanged", {
-      detail: { activeTab: tabName }
+      detail: { activeTab: tabName },
     });
     document.dispatchEvent(event);
   }
@@ -172,7 +253,8 @@ class App {
   showNotification(message, type = "info") {
     const notification = document.createElement("div");
     notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+    notification.style.cssText =
+      "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
     notification.innerHTML = `
       ${message}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -186,4 +268,22 @@ class App {
       }
     }, 3000);
   }
+
+  // Test method to verify authentication state
+  testAuthState() {
+    const state = store.getState();
+    console.log("🧪 Testing authentication state:");
+    console.log("  - isAuthenticated:", state.isAuthenticated);
+    console.log("  - isGuest:", state.isGuest);
+    console.log("  - user:", state.user);
+    console.log("  - currentView:", state.currentView);
+
+    // Check localStorage
+    const storedUser = localStorage.getItem("study_ai_user");
+    const storedAuth = localStorage.getItem("study_ai_authenticated");
+    console.log("  - storedUser:", storedUser);
+    console.log("  - storedAuth:", storedAuth);
+  }
 }
+
+export default App;

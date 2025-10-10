@@ -1,0 +1,679 @@
+/* Responsive Design - Mobile First Approach */
+
+/* Base styles are mobile-first in main.css */
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+
+  .wizard-card {
+    max-width: 500px;
+  }
+
+  .stat-card {
+    padding: var(--spacing-xl);
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+  }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+
+  /* Navigation */
+  .navbar-nav .nav-link {
+    padding: var(--spacing-sm) var(--spacing-lg) !important;
+  }
+
+  /* Wizard */
+  .wizard-container {
+    padding: var(--spacing-2xl);
+  }
+
+  .wizard-card {
+    max-width: 600px;
+  }
+
+  .wizard-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .wizard-footer {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .wizard-buttons {
+    width: auto;
+  }
+
+  /* Dashboard Grid */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+
+  /* File Grid */
+  .file-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  /* Cards */
+  .card {
+    margin-bottom: var(--spacing-lg);
+  }
+
+  /* Statistics */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+
+  .stat-value {
+    font-size: 3rem;
+  }
+
+  /* Quiz */
+  .quiz-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+  }
+
+  /* Chat */
+  .chat-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .chat-message-content {
+    max-width: 60%;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: 600px;
+  }
+
+  /* Notifications */
+  .notification {
+    max-width: 500px;
+  }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .container {
+    max-width: 960px;
+  }
+
+  /* Navigation */
+  .navbar-brand {
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Main Content */
+  .main-content {
+    padding-top: 90px; /* Account for larger navbar */
+  }
+
+  /* Page Headers */
+  .page-header {
+    padding: var(--spacing-2xl) 0;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-xl);
+  }
+
+  /* Wizard */
+  .wizard-container {
+    padding: var(--spacing-3xl);
+  }
+
+  .wizard-card {
+    max-width: 700px;
+  }
+
+  .wizard-options {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Dashboard Grid */
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* File Grid */
+  .file-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Statistics */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .stat-value {
+    font-size: 3.5rem;
+  }
+
+  /* Sidebar Layout */
+  .sidebar-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .sidebar {
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+  }
+
+  .sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar-nav li {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--text-dark);
+    text-decoration: none;
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-fast);
+  }
+
+  .sidebar-nav a:hover,
+  .sidebar-nav a.active {
+    background-color: var(--bg-accent);
+    color: var(--primary-color);
+  }
+
+  /* Quiz */
+  .quiz-options {
+    grid-template-columns: 1fr;
+  }
+
+  .quiz-question {
+    padding: var(--spacing-xl);
+  }
+
+  /* Chat */
+  .chat-container {
+    max-width: 900px;
+  }
+
+  .chat-message-content {
+    max-width: 50%;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: 700px;
+  }
+
+  /* File Management */
+  .file-management {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: var(--spacing-xl);
+  }
+
+  .file-filters {
+    background-color: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+  }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .container {
+    max-width: 1140px;
+  }
+
+  /* Dashboard Grid */
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* File Grid */
+  .file-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Statistics */
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stat-value {
+    font-size: 4rem;
+  }
+
+  /* Wizard */
+  .wizard-card {
+    max-width: 800px;
+  }
+
+  .wizard-options {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Quiz */
+  .quiz-container {
+    max-width: 1000px;
+  }
+
+  .quiz-options {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Chat */
+  .chat-container {
+    max-width: 1000px;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: 800px;
+  }
+}
+
+/* Extra extra large devices (1400px and up) */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1320px;
+  }
+
+  /* Page Headers */
+  .page-title {
+    font-size: 3rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.5rem;
+  }
+
+  /* Statistics */
+  .stat-value {
+    font-size: 4.5rem;
+  }
+
+  /* Wizard */
+  .wizard-card {
+    max-width: 900px;
+  }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 767.98px) {
+  /* Navigation */
+  .navbar-brand {
+    font-size: var(--font-size-lg);
+  }
+
+  .navbar-nav .nav-link {
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+    border-bottom: 1px solid var(--medium-gray);
+  }
+
+  .navbar-nav .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  /* Main Content */
+  .main-content {
+    padding-top: 70px;
+  }
+
+  /* Page Headers */
+  .page-header {
+    padding: var(--spacing-lg) 0;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .page-subtitle {
+    font-size: var(--font-size-base);
+  }
+
+  /* Cards */
+  .card-body {
+    padding: var(--spacing-md);
+  }
+
+  /* Statistics */
+  .stat-card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: var(--font-size-xs);
+  }
+
+  /* File Items */
+  .file-item {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+
+  .file-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Quiz */
+  .quiz-question {
+    padding: var(--spacing-md);
+  }
+
+  .quiz-question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .quiz-question-number {
+    align-self: flex-start;
+  }
+
+  .quiz-options {
+    display: block;
+  }
+
+  .quiz-option {
+    padding: var(--spacing-sm);
+  }
+
+  /* Chat */
+  .chat-message {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chat-message.user {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .chat-message-content {
+    max-width: 85%;
+  }
+
+  .chat-input {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .chat-send-btn {
+    align-self: flex-end;
+  }
+
+  /* Modals */
+  .modal-overlay {
+    padding: var(--spacing-sm);
+  }
+
+  .modal-content {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-md);
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .modal-footer .btn:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Notifications */
+  .notification {
+    max-width: 100%;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  /* Forms */
+  .form-control {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+
+  /* Buttons */
+  .btn {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+  }
+
+  .btn-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+  }
+
+  .btn-lg {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+  }
+
+  /* Grid adjustments */
+  .dashboard-grid,
+  .file-grid,
+  .stats-grid {
+    display: block;
+  }
+
+  .dashboard-grid > *,
+  .file-grid > *,
+  .stats-grid > * {
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Sidebar */
+  .sidebar-layout {
+    display: block;
+  }
+
+  .sidebar {
+    position: static;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  /* File Management */
+  .file-management {
+    display: block;
+  }
+
+  .file-filters {
+    position: static;
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 767.98px) and (orientation: landscape) {
+  .wizard-container {
+    padding: var(--spacing-md);
+  }
+
+  .wizard-card {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-content {
+    max-height: 90vh;
+  }
+
+  .chat-container {
+    max-height: 70vh;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .file-icon,
+  .quiz-question-number,
+  .stat-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .stat-card::before,
+  .progress-bar::after {
+    animation: none !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-accent: #3a3a3a;
+    --text-dark: #ffffff;
+    --text-muted: #b0b0b0;
+    --white: #2d2d2d;
+    --light-gray: #3a3a3a;
+    --medium-gray: #4a4a4a;
+    --dark-gray: #6a6a6a;
+  }
+
+  .card {
+    background-color: var(--white);
+    border-color: var(--medium-gray);
+  }
+
+  .navbar {
+    background-color: var(--primary-color) !important;
+  }
+
+  .modal-content {
+    background-color: var(--white);
+  }
+
+  .notification {
+    background-color: var(--white);
+    border-color: var(--medium-gray);
+  }
+}
+
+/* Print styles */
+@media print {
+  .navbar,
+  .btn,
+  .file-actions,
+  .chat-input,
+  .modal-overlay,
+  .notification,
+  .wizard-footer {
+    display: none !important;
+  }
+
+  .main-content {
+    padding-top: 0 !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid var(--medium-gray) !important;
+    break-inside: avoid;
+  }
+
+  .file-item {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .quiz-question {
+    break-inside: avoid;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .page-header {
+    border-bottom: 2px solid var(--primary-color);
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .page-title {
+    color: var(--primary-color) !important;
+  }
+
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

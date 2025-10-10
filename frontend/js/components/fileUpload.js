@@ -1,4 +1,10 @@
 // File upload component functionality
+import FileHandler from "../utils/fileHandler.js";
+import { CONFIG } from "../config.js";
+import { authState } from "../state/auth-state.js";
+import { store } from "../state/store.js";
+import { notificationManager } from "../utils/notifications.js";
+
 class FileUpload {
   constructor(container) {
     this.container = container;
@@ -6,7 +12,7 @@ class FileUpload {
     this.maxFileSize = 10 * 1024 * 1024; // 10MB
     this.allowedTypes = [
       ".pdf",
-      ".docx", 
+      ".docx",
       ".pptx",
       ".txt",
       ".jpg",
@@ -62,6 +68,14 @@ class FileUpload {
 
                 <!-- File List -->
                 <div id="fileList" class="file-list"></div>
+                
+                <!-- Detection Results -->
+                <div id="detectionResults" class="detection-results" style="display: none;">
+                  <div class="alert alert-info">
+                    <strong>Auto-detected:</strong>
+                    <div id="detectedValues"></div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -73,6 +87,7 @@ class FileUpload {
                   <div class="form-group">
                     <label for="subjectSelect" class="form-label">📚 Subject</label>
                     <select class="form-select" id="subjectSelect">
+                      <option value="" selected>Auto-Detect (Recommended)</option>
                       <option value="mathematics">Mathematics</option>
                       <option value="physics">Physics</option>
                       <option value="chemistry">Chemistry</option>
@@ -86,8 +101,9 @@ class FileUpload {
                   <div class="form-group">
                     <label for="levelSelect" class="form-label">🎓 Student Level</label>
                     <select class="form-select" id="levelSelect">
+                      <option value="" selected>Auto-Detect (Recommended)</option>
                       <option value="beginner">Beginner</option>
-                      <option value="intermediate" selected>Intermediate</option>
+                      <option value="intermediate">Intermediate</option>
                       <option value="advanced">Advanced</option>
                     </select>
                   </div>
@@ -221,7 +237,7 @@ class FileUpload {
     this.uploadedFiles.push(fileObj);
     this.updateFileList();
     this.updateAnalyzeButton();
-    
+
     // Emit event for other components
     this.emit("filesUploaded", this.uploadedFiles);
   }
@@ -246,7 +262,8 @@ class FileUpload {
 
   createFileItem(fileObj) {
     const div = document.createElement("div");
-    div.className = "file-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded";
+    div.className =
+      "file-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded";
     div.innerHTML = `
       <div class="file-info d-flex align-items-center">
         <i class="fas fa-file file-icon me-2"></i>
@@ -256,18 +273,20 @@ class FileUpload {
         </div>
       </div>
       <div class="file-actions">
-        <button class="btn btn-sm btn-outline-danger remove-file-btn" data-file-id="${fileObj.id}">
+        <button class="btn btn-sm btn-outline-danger remove-file-btn" data-file-id="${
+          fileObj.id
+        }">
           <i class="fas fa-trash"></i>
         </button>
       </div>
     `;
-    
+
     // Add event listener for remove button
     const removeBtn = div.querySelector(".remove-file-btn");
     removeBtn.addEventListener("click", () => {
       this.removeFile(fileObj.id);
     });
-    
+
     return div;
   }
 
@@ -279,17 +298,61 @@ class FileUpload {
   }
 
   async analyzeFiles() {
-    if (this.uploadedFiles.length === 0) return;
+    if (this.uploadedFiles.length === 0) {
+      return;
+    }
 
-    const subject = document.getElementById("subjectSelect")?.value || "mathematics";
-    const studentLevel = document.getElementById("levelSelect")?.value || "intermediate";
+    const subject = document.getElementById("subjectSelect")?.value || "";
+    const studentLevel = document.getElementById("levelSelect")?.value || "";
 
-    // Emit analysis request event
-    this.emit("analysisRequested", {
-      files: this.uploadedFiles,
-      subject,
-      studentLevel
-    });
+    // Show upload progress
+    this.showUploadProgress();
+
+    try {
+      const uploadPromises = this.uploadedFiles.map((fileObj) =>
+        this.uploadSingleFile(fileObj, subject, studentLevel)
+      );
+
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Extract detected values from results
+      const detectedSubjects = uploadResults
+        .map((r) => r.data?.detectedSubject || r.data?.subject)
+        .filter(Boolean);
+      const detectedLevels = uploadResults
+        .map((r) => r.data?.detectedLevel || r.data?.studentLevel)
+        .filter(Boolean);
+
+      // Show detection results if auto-detected
+      if (subject === "" || studentLevel === "") {
+        this.showDetectionResults(
+          detectedSubjects[0] || "",
+          detectedLevels[0] || ""
+        );
+      }
+
+      this.hideUploadProgress();
+
+      // Show success notification
+      notificationManager.success(
+        `Successfully analyzed ${uploadResults.length} file(s)!`
+      );
+
+      // Clear uploaded files from UI
+      this.uploadedFiles = [];
+      this.updateFileList();
+      this.updateAnalyzeButton();
+
+      // Emit analysis request event with uploaded file IDs
+      this.emit("analysisRequested", {
+        files: uploadResults.map((r) => r.data),
+        subject: detectedSubjects[0] || subject,
+        studentLevel: detectedLevels[0] || studentLevel,
+      });
+    } catch (error) {
+      this.hideUploadProgress();
+      this.showError("Failed to upload files: " + error.message);
+    }
   }
 
   async readFileContent(file) {
@@ -338,7 +401,7 @@ class FileUpload {
 
   emit(event, data) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(callback => callback(data));
+      this.eventListeners[event].forEach((callback) => callback(data));
     }
   }
 
@@ -348,4 +411,71 @@ class FileUpload {
       analyzeBtn.disabled = false;
     }
   }
+
+  async uploadSingleFile(fileObj, subject, studentLevel) {
+    const userId = authState.isAuthenticated()
+      ? store.getState().user?.id
+      : CONFIG.GUEST_USER_ID;
+    const result = await FileHandler.processFile(
+      fileObj.file,
+      userId,
+      subject,
+      studentLevel
+    );
+    return result;
+  }
+
+  showUploadProgress() {
+    const progressDiv = document.getElementById("uploadProgress");
+    if (progressDiv) {
+      progressDiv.style.display = "block";
+    }
+  }
+
+  hideUploadProgress() {
+    const progressDiv = document.getElementById("uploadProgress");
+    if (progressDiv) {
+      progressDiv.style.display = "none";
+    }
+  }
+
+  showDetectionResults(subject, level) {
+    const resultsDiv = document.getElementById("detectionResults");
+    const valuesDiv = document.getElementById("detectedValues");
+
+    if (resultsDiv && valuesDiv && (subject || level)) {
+      valuesDiv.innerHTML = `
+        ${subject ? `<div>Subject: <strong>${subject}</strong></div>` : ""}
+        ${level ? `<div>Level: <strong>${level}</strong></div>` : ""}
+      `;
+      resultsDiv.style.display = "block";
+    }
+  }
+
+  showSuccess(message) {
+    notificationManager.success(message);
+  }
+
+  clearUploadedFiles() {
+    // Clear the uploaded files array
+    this.uploadedFiles = [];
+
+    // Clear the file input
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput) {
+      fileInput.value = "";
+    }
+
+    // Update the file list display
+    this.updateFileList();
+    this.updateAnalyzeButton();
+
+    // Hide detection results
+    const detectionResults = document.getElementById("detectionResults");
+    if (detectionResults) {
+      detectionResults.style.display = "none";
+    }
+  }
 }
+
+export default FileUpload;

@@ -626,6 +626,11 @@ namespace StudentStudyAI.Services
                 SELECT Id, 'standard', 'adaptive', 30, 'balanced'
                 FROM Users
                 WHERE Id NOT IN (SELECT UserId FROM UserLearningPreferences);
+
+                -- Create guest user for non-authenticated access
+                DELETE FROM Users WHERE Id = 0;
+                INSERT INTO Users (Id, Username, Email, PasswordHash, CreatedAt, LastLoginAt, IsActive)
+                VALUES (0, 'guest', 'guest@system.local', '', NOW(), NOW(), TRUE);
             ";
 
             var command = new MySqlCommand(createTablesScript, connection);

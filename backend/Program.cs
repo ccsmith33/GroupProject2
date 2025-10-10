@@ -96,6 +96,7 @@ builder.Services.AddScoped<IAnalysisService, AnalysisService>();
 builder.Services.AddScoped<AIResponseParser>();
 builder.Services.AddScoped<CachedAnalysisService>();
 builder.Services.AddScoped<ValidationService>();
+builder.Services.AddScoped<FileValidator>();
 
 // Add JWT Authentication
 builder.Services.AddAuthentication(options =>
@@ -137,10 +138,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.SetIsOriginAllowed(origin => true)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+        policy.SetIsOriginAllowed(origin => 
+        {
+            // Allow all origins including file:// protocol for local development
+            return true;
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromSeconds(2520)) // 42 minutes
+        .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
     });
 });
 
@@ -171,6 +178,13 @@ app.MapControllers();
 
 // Health check endpoint
 app.MapGet("/health", () => "API is running");
+
+// CORS test endpoint
+app.MapGet("/cors-test", () => new { 
+    message = "CORS is working!", 
+    timestamp = DateTime.UtcNow,
+    allowedOrigins = "All origins including file:// protocol"
+}).WithName("CorsTest");
 
 // MySQL connection test endpoint
 app.MapGet("/test-mysql", async (IServiceProvider serviceProvider) =>
@@ -265,6 +279,59 @@ app.MapGet("/test-mysql", async (IServiceProvider serviceProvider) =>
 
 // Test page endpoint
 app.MapGet("/test", () => Results.File("test-api.html", "text/html"));
+
+// Check guest user endpoint
+app.MapGet("/check-guest-user", async (IServiceProvider serviceProvider) =>
+{
+    try
+    {
+        var dbService = serviceProvider.GetRequiredService<DatabaseService>();
+        using var connection = await dbService.GetConnectionAsync();
+        
+        var command = new MySqlCommand("SELECT COUNT(*) FROM Users WHERE Id = 0", connection);
+        var count = await command.ExecuteScalarAsync();
+        
+        return Results.Ok(new { 
+            guestUserExists = Convert.ToInt32(count) > 0,
+            count = count
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error checking guest user: {ex.Message}");
+    }
+});
+
+// Create guest user endpoint
+app.MapPost("/create-guest-user", async (IServiceProvider serviceProvider) =>
+{
+    try
+    {
+        var dbService = serviceProvider.GetRequiredService<DatabaseService>();
+        using var connection = await dbService.GetConnectionAsync();
+        
+        // First delete any existing guest user
+        var deleteCommand = new MySqlCommand("DELETE FROM Users WHERE Id = 0", connection);
+        await deleteCommand.ExecuteNonQueryAsync();
+        
+        // Then insert the guest user
+        var insertCommand = new MySqlCommand(@"
+            INSERT INTO Users (Id, Username, Email, PasswordHash, CreatedAt, LastLoginAt, IsActive)
+            VALUES (0, 'guest', 'guest@system.local', '', NOW(), NOW(), TRUE)
+        ", connection);
+        
+        await insertCommand.ExecuteNonQueryAsync();
+        
+        return Results.Ok(new { 
+            message = "Guest user created successfully",
+            userId = 0
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error creating guest user: {ex.Message}");
+    }
+});
 
 // Database initialization endpoint
 app.MapGet("/init-db", async (IServiceProvider serviceProvider) =>

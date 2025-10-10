@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Study AI - Frontend Test</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f8f9fa;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c5aa0;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+      }
+      .test-section h2 {
+        color: #495057;
+        margin-top: 0;
+      }
+      .test-item {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 5px;
+      }
+      .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+      }
+      .status.pass {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status.fail {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .status.pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .instructions {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .instructions h3 {
+        margin-top: 0;
+        color: #0066cc;
+      }
+      .code-block {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 4px;
+        padding: 10px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Student Study AI Frontend Test</h1>
+
+      <div class="instructions">
+        <h3>📋 Test Instructions</h3>
+        <p>
+          This page helps you verify that the frontend application is working
+          correctly. Follow these steps:
+        </p>
+        <ol>
+          <li>
+            Ensure the backend API is running on <code>localhost:5000</code>
+          </li>
+          <li>Open the main application by clicking the link below</li>
+          <li>Test each feature systematically</li>
+          <li>Check the browser console for any errors</li>
+        </ol>
+      </div>
+
+      <div class="test-section">
+        <h2>🚀 Application Launch</h2>
+        <div class="test-item">
+          <strong>Open Main Application:</strong>
+          <a
+            href="index.html"
+            target="_blank"
+            style="margin-left: 10px; color: #2c5aa0; text-decoration: none"
+          >
+            <button
+              style="
+                background: #2c5aa0;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                cursor: pointer;
+              "
+            >
+              Launch App
+            </button>
+          </a>
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🔧 Backend Connectivity</h2>
+        <div class="test-item">
+          <strong>API Health Check:</strong>
+          <button
+            onclick="testAPI()"
+            style="
+              background: #28a745;
+              color: white;
+              border: none;
+              padding: 4px 8px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-left: 10px;
+            "
+          >
+            Test API
+          </button>
+          <span id="api-status" class="status pending">Not Tested</span>
+        </div>
+        <div class="test-item">
+          <strong>Database Initialization:</strong>
+          <button
+            onclick="testDB()"
+            style="
+              background: #17a2b8;
+              color: white;
+              border: none;
+              padding: 4px 8px;
+              border-radius: 4px;
+              cursor: pointer;
+              margin-left: 10px;
+            "
+          >
+            Test DB
+          </button>
+          <span id="db-status" class="status pending">Not Tested</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>📁 File Management</h2>
+        <div class="test-item">
+          <strong>File Upload:</strong> Test drag-and-drop and file selection
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>File Processing:</strong> Verify files are processed and
+          grouped
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Subject Detection:</strong> Check AI-powered subject
+          classification
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🤖 AI Features</h2>
+        <div class="test-item">
+          <strong>Study Guide Generation:</strong> Create study guides from
+          uploaded files
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Quiz Generation:</strong> Generate interactive quizzes
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>AI Chat:</strong> Test conversational AI assistance
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Model Selection:</strong> Verify different models for guests
+          vs authenticated users
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>📊 Analytics & Progress</h2>
+        <div class="test-item">
+          <strong>Dashboard Stats:</strong> Verify statistics display correctly
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Progress Charts:</strong> Test Chart.js integration
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Data Export:</strong> Test CSV/JSON export functionality
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>👤 Authentication</h2>
+        <div class="test-item">
+          <strong>Guest Mode:</strong> Test limited functionality for guests
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>User Registration:</strong> Test account creation
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>User Login:</strong> Test authentication flow
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>📱 Responsive Design</h2>
+        <div class="test-item">
+          <strong>Mobile View:</strong> Test on mobile devices or browser dev
+          tools
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Tablet View:</strong> Test on tablet-sized screens
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Desktop View:</strong> Test on desktop screens
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🐛 Error Handling</h2>
+        <div class="test-item">
+          <strong>Network Errors:</strong> Test offline/connection issues
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>API Errors:</strong> Test with invalid API responses
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Validation Errors:</strong> Test form validation
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h2>🔍 Debug Information</h2>
+        <div class="test-item">
+          <strong>Console Logs:</strong> Check browser console for errors
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Network Tab:</strong> Monitor API calls in dev tools
+          <span class="status pending">Manual Test</span>
+        </div>
+        <div class="test-item">
+          <strong>Local Storage:</strong> Check data persistence
+          <span class="status pending">Manual Test</span>
+        </div>
+      </div>
+
+      <div class="instructions">
+        <h3>📝 Test Checklist</h3>
+        <p>Use this checklist to ensure all features are working:</p>
+        <ul>
+          <li>□ Application loads without errors</li>
+          <li>□ Navigation works between all sections</li>
+          <li>□ File upload accepts supported formats</li>
+          <li>□ Files are processed and grouped automatically</li>
+          <li>□ Study guides can be generated</li>
+          <li>□ Quizzes can be created and taken</li>
+          <li>□ AI chat responds to messages</li>
+          <li>□ Dashboard shows correct statistics</li>
+          <li>□ Progress charts display data</li>
+          <li>□ Guest mode has appropriate limitations</li>
+          <li>□ User registration and login work</li>
+          <li>□ Responsive design works on all screen sizes</li>
+          <li>□ Error messages are user-friendly</li>
+          <li>□ Data persists between sessions</li>
+        </ul>
+      </div>
+
+      <!-- New Test Section: Major Fixes -->
+      <div class="test-section">
+        <h2>🔧 Major Fixes Validation</h2>
+
+        <div class="test-item">
+          <strong>Auth Response Handling:</strong>
+          <span id="auth-response-status" class="status pending"
+            >Not tested</span
+          >
+          <button onclick="testAuthResponse()">Test</button>
+          <div
+            id="auth-response-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="test-item">
+          <strong>Storage Service:</strong>
+          <span id="storage-service-status" class="status pending"
+            >Not tested</span
+          >
+          <button onclick="testStorageService()">Test</button>
+          <div
+            id="storage-service-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="test-item">
+          <strong>API Error Handling:</strong>
+          <span id="api-error-status" class="status pending">Not tested</span>
+          <button onclick="testAPIErrorHandling()">Test</button>
+          <div
+            id="api-error-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="test-item">
+          <strong>Event Listener Cleanup:</strong>
+          <span id="event-cleanup-status" class="status pending"
+            >Not tested</span
+          >
+          <button onclick="testEventCleanup()">Test</button>
+          <div
+            id="event-cleanup-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="test-item">
+          <strong>Runtime Dependencies:</strong>
+          <span id="dependencies-status" class="status pending"
+            >Not tested</span
+          >
+          <button onclick="testDependencies()">Test</button>
+          <div
+            id="dependencies-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div class="test-item">
+          <strong>File Upload Sanitization:</strong>
+          <span id="file-sanitization-status" class="status pending"
+            >Not tested</span
+          >
+          <button onclick="testFileSanitization()">Test</button>
+          <div
+            id="file-sanitization-details"
+            class="test-details"
+            style="display: none"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function testAPI() {
+        const statusEl = document.getElementById("api-status");
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+
+        try {
+          const response = await fetch("http://localhost:5000/health");
+          if (response.ok) {
+            statusEl.textContent = "Connected";
+            statusEl.className = "status pass";
+          } else {
+            statusEl.textContent = "Error: " + response.status;
+            statusEl.className = "status fail";
+          }
+        } catch (error) {
+          statusEl.textContent = "Failed: " + error.message;
+          statusEl.className = "status fail";
+        }
+      }
+
+      async function testDB() {
+        const statusEl = document.getElementById("db-status");
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+
+        try {
+          const response = await fetch("http://localhost:5000/api/init-db", {
+            method: "POST",
+          });
+          if (response.ok) {
+            statusEl.textContent = "Initialized";
+            statusEl.className = "status pass";
+          } else {
+            statusEl.textContent = "Error: " + response.status;
+            statusEl.className = "status fail";
+          }
+        } catch (error) {
+          statusEl.textContent = "Failed: " + error.message;
+          statusEl.className = "status fail";
+        }
+      }
+
+      // Test functions for major fixes
+      async function testAuthResponse() {
+        const statusEl = document.getElementById("auth-response-status");
+        const detailsEl = document.getElementById("auth-response-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          // Test registration with different response formats
+          const testData = {
+            email: "test@example.com",
+            password: "Test123!",
+            name: "Test User",
+          };
+
+          const response = await fetch(
+            "http://localhost:5000/api/auth/register",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(testData),
+            }
+          );
+
+          const data = await response.json();
+
+          // Check if response has expected structure
+          const hasAccessToken = data.accessToken || data.data?.accessToken;
+          const hasUser = data.user || data.data?.user;
+
+          if (hasAccessToken && hasUser) {
+            statusEl.textContent = "Pass";
+            statusEl.className = "status pass";
+            detailsEl.innerHTML = "✅ Auth response handling works correctly";
+          } else {
+            statusEl.textContent = "Fail";
+            statusEl.className = "status fail";
+            detailsEl.innerHTML = "❌ Auth response structure incorrect";
+          }
+        } catch (error) {
+          statusEl.textContent = "Error";
+          statusEl.className = "status fail";
+          detailsEl.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+
+      async function testStorageService() {
+        const statusEl = document.getElementById("storage-service-status");
+        const detailsEl = document.getElementById("storage-service-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          // Test if storageService is available
+          if (typeof storageService !== "undefined") {
+            // Test basic storage operations
+            await storageService.setItem("test-key", "test-value");
+            const retrieved = await storageService.getItem("test-key");
+
+            if (retrieved === "test-value") {
+              statusEl.textContent = "Pass";
+              statusEl.className = "status pass";
+              detailsEl.innerHTML = "✅ Storage service working correctly";
+            } else {
+              statusEl.textContent = "Fail";
+              statusEl.className = "status fail";
+              detailsEl.innerHTML = "❌ Storage service not working properly";
+            }
+
+            // Cleanup
+            await storageService.removeItem("test-key");
+          } else {
+            statusEl.textContent = "Fail";
+            statusEl.className = "status fail";
+            detailsEl.innerHTML = "❌ Storage service not available";
+          }
+        } catch (error) {
+          statusEl.textContent = "Error";
+          statusEl.className = "status fail";
+          detailsEl.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+
+      async function testAPIErrorHandling() {
+        const statusEl = document.getElementById("api-error-status");
+        const detailsEl = document.getElementById("api-error-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          // Test API call to non-existent endpoint
+          const response = await fetch(
+            "http://localhost:5000/api/nonexistent",
+            {
+              method: "GET",
+            }
+          );
+
+          if (response.status === 404) {
+            statusEl.textContent = "Pass";
+            statusEl.className = "status pass";
+            detailsEl.innerHTML = "✅ API error handling works correctly";
+          } else {
+            statusEl.textContent = "Fail";
+            statusEl.className = "status fail";
+            detailsEl.innerHTML = "❌ Unexpected response: " + response.status;
+          }
+        } catch (error) {
+          statusEl.textContent = "Pass";
+          statusEl.className = "status pass";
+          detailsEl.innerHTML =
+            "✅ API error handling works correctly (caught error)";
+        }
+      }
+
+      function testEventCleanup() {
+        const statusEl = document.getElementById("event-cleanup-status");
+        const detailsEl = document.getElementById("event-cleanup-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          // Check if cleanup functions exist on components
+          const hasCleanup =
+            typeof app !== "undefined" && typeof app.cleanup === "function";
+
+          if (hasCleanup) {
+            statusEl.textContent = "Pass";
+            statusEl.className = "status pass";
+            detailsEl.innerHTML = "✅ Event listener cleanup methods available";
+          } else {
+            statusEl.textContent = "Fail";
+            statusEl.className = "status fail";
+            detailsEl.innerHTML = "❌ Event listener cleanup methods not found";
+          }
+        } catch (error) {
+          statusEl.textContent = "Error";
+          statusEl.className = "status fail";
+          detailsEl.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+
+      function testDependencies() {
+        const statusEl = document.getElementById("dependencies-status");
+        const detailsEl = document.getElementById("dependencies-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          const results = [];
+
+          // Check Bootstrap
+          if (typeof bootstrap !== "undefined") {
+            results.push("✅ Bootstrap loaded");
+          } else {
+            results.push("❌ Bootstrap not loaded");
+          }
+
+          // Check Chart.js
+          if (typeof Chart !== "undefined") {
+            results.push("✅ Chart.js loaded");
+          } else {
+            results.push("❌ Chart.js not loaded");
+          }
+
+          // Check logger
+          if (typeof logger !== "undefined") {
+            results.push("✅ Logger service available");
+          } else {
+            results.push("❌ Logger service not available");
+          }
+
+          const allPassed = results.every((r) => r.includes("✅"));
+
+          if (allPassed) {
+            statusEl.textContent = "Pass";
+            statusEl.className = "status pass";
+          } else {
+            statusEl.textContent = "Partial";
+            statusEl.className = "status warning";
+          }
+
+          detailsEl.innerHTML = results.join("<br>");
+        } catch (error) {
+          statusEl.textContent = "Error";
+          statusEl.className = "status fail";
+          detailsEl.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+
+      async function testFileSanitization() {
+        const statusEl = document.getElementById("file-sanitization-status");
+        const detailsEl = document.getElementById("file-sanitization-details");
+
+        statusEl.textContent = "Testing...";
+        statusEl.className = "status pending";
+        detailsEl.style.display = "block";
+
+        try {
+          // Test file upload with malicious filename
+          const formData = new FormData();
+          const maliciousFile = new File(
+            ["test content"],
+            "../../../etc/passwd",
+            { type: "text/plain" }
+          );
+          formData.append("file", maliciousFile);
+          formData.append("userId", "1");
+          formData.append("subject", "test");
+
+          const response = await fetch(
+            "http://localhost:5000/api/files/upload",
+            {
+              method: "POST",
+              body: formData,
+            }
+          );
+
+          const data = await response.json();
+
+          if (
+            response.status === 400 &&
+            data.message &&
+            data.message.includes("validation")
+          ) {
+            statusEl.textContent = "Pass";
+            statusEl.className = "status pass";
+            detailsEl.innerHTML = "✅ File sanitization working correctly";
+          } else {
+            statusEl.textContent = "Fail";
+            statusEl.className = "status fail";
+            detailsEl.innerHTML = "❌ File sanitization not working properly";
+          }
+        } catch (error) {
+          statusEl.textContent = "Error";
+          statusEl.className = "status fail";
+          detailsEl.innerHTML = "❌ Error: " + error.message;
+        }
+      }
+
+      // Auto-test API on page load
+      window.addEventListener("load", () => {
+        testAPI();
+      });
+    </script>
+  </body>
+</html>

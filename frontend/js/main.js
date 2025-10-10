@@ -1,4 +1,6 @@
 // Main application entry point
+import App from "./components/app.js";
+
 // Initialize the application when DOM is loaded
 document.addEventListener("DOMContentLoaded", function () {
   console.log("Data Driven Studying Platform loading...");
@@ -6,7 +8,10 @@ document.addEventListener("DOMContentLoaded", function () {
   try {
     // Create and initialize the main app
     const app = new App();
-    
+
+    // Make app available globally for testing
+    window.app = app;
+
     // Mount the app to the root element
     const appRoot = document.getElementById("app-root");
     if (appRoot) {
@@ -16,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Data Driven Studying Platform loaded successfully");
   } catch (error) {
     console.error("Failed to initialize application:", error);
-    
+
     // Show error message to user
     const appRoot = document.getElementById("app-root");
     if (appRoot) {
@@ -36,10 +41,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Global utility functions
 window.StudentStudyAI = {
-  showNotification: function(message, type = "info") {
+  showNotification: function (message, type = "info") {
     const notification = document.createElement("div");
     notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+    notification.style.cssText =
+      "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
     notification.innerHTML = `
       ${message}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -54,12 +60,12 @@ window.StudentStudyAI = {
     }, 3000);
   },
 
-  formatDate: function(dateString) {
+  formatDate: function (dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   },
 
-  debounce: function(func, wait) {
+  debounce: function (func, wait) {
     let timeout;
     return function executedFunction(...args) {
       const later = () => {
@@ -69,5 +75,14 @@ window.StudentStudyAI = {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
-  }
+  },
+
+  // Test authentication state
+  testAuth: function () {
+    if (window.app && window.app.testAuthState) {
+      window.app.testAuthState();
+    } else {
+      console.log("App not available yet. Try again in a moment.");
+    }
+  },
 };

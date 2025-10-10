@@ -811,7 +811,7 @@ class LandingPage {
     if (learnMoreBtn) {
       learnMoreBtn.addEventListener("click", () => {
         document.querySelector(".features-section").scrollIntoView({
-          behavior: "smooth"
+          behavior: "smooth",
         });
       });
     }
@@ -831,7 +831,7 @@ class LandingPage {
     if (ctaLearnMoreBtn) {
       ctaLearnMoreBtn.addEventListener("click", () => {
         document.querySelector(".features-section").scrollIntoView({
-          behavior: "smooth"
+          behavior: "smooth",
         });
       });
     }
@@ -841,7 +841,10 @@ class LandingPage {
     if (themeToggle) {
       themeToggle.addEventListener("click", () => {
         document.body.classList.toggle("dark-mode");
-        localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+        localStorage.setItem(
+          "theme",
+          document.body.classList.contains("dark-mode") ? "dark" : "light"
+        );
       });
     }
 
@@ -857,7 +860,7 @@ class LandingPage {
     window.addEventListener("scroll", () => {
       const navbar = document.querySelector(".studyspree-navbar");
       const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-      
+
       if (navbar) {
         if (window.scrollY > 50) {
           navbar.classList.add("scrolled");
@@ -865,7 +868,7 @@ class LandingPage {
           navbar.classList.remove("scrolled");
         }
       }
-      
+
       if (scrollToTopBtn) {
         if (window.scrollY > 300) {
           scrollToTopBtn.classList.add("visible");
@@ -930,101 +933,101 @@ class LandingPage {
   }
 
   showMessyNotes() {
-    const notes = document.querySelectorAll('.note');
+    const notes = document.querySelectorAll(".note");
     notes.forEach((note, index) => {
       setTimeout(() => {
-        note.style.opacity = '1';
-        note.style.transform = 'translateY(0) scale(1)';
-        note.style.animation = 'noteScatter 0.5s ease-out';
+        note.style.opacity = "1";
+        note.style.transform = "translateY(0) scale(1)";
+        note.style.animation = "noteScatter 0.5s ease-out";
       }, index * 100);
     });
   }
 
   startVacuumAnimation() {
-    const robot = document.querySelector('.robot-character');
-    const hose = document.querySelector('.vacuum-hose');
-    
+    const robot = document.querySelector(".robot-character");
+    const hose = document.querySelector(".vacuum-hose");
+
     // Robot moves toward notes
     if (robot) {
-      robot.style.animation = 'robotMove 2s ease-in-out';
+      robot.style.animation = "robotMove 2s ease-in-out";
     }
 
     // Vacuum hose extends
     if (hose) {
-      hose.style.animation = 'hoseExtend 1s ease-out 0.5s both';
+      hose.style.animation = "hoseExtend 1s ease-out 0.5s both";
     }
 
     // Notes get sucked in
-    const notes = document.querySelectorAll('.note');
+    const notes = document.querySelectorAll(".note");
     notes.forEach((note, index) => {
       setTimeout(() => {
-        note.style.animation = 'noteSuction 1s ease-in forwards';
-      }, 1000 + (index * 100));
+        note.style.animation = "noteSuction 1s ease-in forwards";
+      }, 1000 + index * 100);
     });
   }
 
   showProcessing() {
-    const processing = document.querySelector('.processing-animation');
+    const processing = document.querySelector(".processing-animation");
     if (processing) {
-      processing.style.display = 'block';
-      processing.style.animation = 'processingPulse 2s ease-in-out infinite';
+      processing.style.display = "block";
+      processing.style.animation = "processingPulse 2s ease-in-out infinite";
     }
   }
 
   showCleanNotes() {
-    const processing = document.querySelector('.processing-animation');
+    const processing = document.querySelector(".processing-animation");
     if (processing) {
-      processing.style.display = 'none';
+      processing.style.display = "none";
     }
 
-    const cleanNotes = document.querySelectorAll('.clean-note');
+    const cleanNotes = document.querySelectorAll(".clean-note");
     cleanNotes.forEach((note, index) => {
       setTimeout(() => {
-        note.style.opacity = '1';
-        note.style.transform = 'translateY(0) scale(1)';
-        note.style.animation = 'noteAppear 0.5s ease-out';
+        note.style.opacity = "1";
+        note.style.transform = "translateY(0) scale(1)";
+        note.style.animation = "noteAppear 0.5s ease-out";
       }, index * 200);
     });
   }
 
   showSuccess() {
-    const success = document.querySelector('.success-message');
+    const success = document.querySelector(".success-message");
     if (success) {
-      success.style.display = 'block';
-      success.style.animation = 'successBounce 1s ease-out';
+      success.style.display = "block";
+      success.style.animation = "successBounce 1s ease-out";
     }
   }
 
   resetAnimation() {
     // Reset all elements to initial state
-    const notes = document.querySelectorAll('.note');
-    const cleanNotes = document.querySelectorAll('.clean-note');
-    const processing = document.querySelector('.processing-animation');
-    const success = document.querySelector('.success-message');
-    const robot = document.querySelector('.robot-character');
-    const hose = document.querySelector('.vacuum-hose');
+    const notes = document.querySelectorAll(".note");
+    const cleanNotes = document.querySelectorAll(".clean-note");
+    const processing = document.querySelector(".processing-animation");
+    const success = document.querySelector(".success-message");
+    const robot = document.querySelector(".robot-character");
+    const hose = document.querySelector(".vacuum-hose");
 
     // Reset messy notes
-    notes.forEach(note => {
-      note.style.opacity = '0';
-      note.style.transform = 'translateY(20px) scale(0.8)';
-      note.style.animation = 'none';
+    notes.forEach((note) => {
+      note.style.opacity = "0";
+      note.style.transform = "translateY(20px) scale(0.8)";
+      note.style.animation = "none";
     });
 
     // Reset clean notes
-    cleanNotes.forEach(note => {
-      note.style.opacity = '0';
-      note.style.transform = 'translateY(20px) scale(0.8)';
-      note.style.animation = 'none';
+    cleanNotes.forEach((note) => {
+      note.style.opacity = "0";
+      note.style.transform = "translateY(20px) scale(0.8)";
+      note.style.animation = "none";
     });
 
     // Hide processing and success
-    if (processing) processing.style.display = 'none';
-    if (success) success.style.display = 'none';
+    if (processing) processing.style.display = "none";
+    if (success) success.style.display = "none";
 
     // Reset robot
-    if (robot) robot.style.animation = 'none';
-    if (hose) hose.style.animation = 'none';
+    if (robot) robot.style.animation = "none";
+    if (hose) hose.style.animation = "none";
   }
 
   on(event, callback) {
@@ -1036,7 +1039,9 @@ class LandingPage {
 
   emit(event, data) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(callback => callback(data));
+      this.eventListeners[event].forEach((callback) => callback(data));
     }
   }
 }
+
+export default LandingPage;

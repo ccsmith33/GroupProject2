@@ -22,6 +22,11 @@ CREATE TABLE IF NOT EXISTS Users (
     INDEX idx_email (Email)
 );
 
+-- Create guest user for non-authenticated access
+INSERT INTO Users (Id, Username, Email, PasswordHash, CreatedAt, LastLoginAt, IsActive)
+VALUES (0, 'guest', 'guest@system.local', '', NOW(), NOW(), TRUE)
+ON DUPLICATE KEY UPDATE Id=Id;
+
 -- Create FileUploads table
 CREATE TABLE IF NOT EXISTS FileUploads (
     Id INT AUTO_INCREMENT PRIMARY KEY,

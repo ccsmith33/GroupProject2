@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StudentStudyAI.Models;
 using StudentStudyAI.Services;
+using MySql.Data.MySqlClient;
 
 namespace StudentStudyAI.Controllers
 {
@@ -12,6 +13,7 @@ namespace StudentStudyAI.Controllers
         private readonly IFileStorageService _fileStorageService;
         private readonly IFileProcessingService _fileProcessingService;
         private readonly IDatabaseService _databaseService;
+        private readonly FileValidator _fileValidator;
         private readonly ILogger<FileGroupingController> _logger;
 
         public FileGroupingController(
@@ -19,12 +21,14 @@ namespace StudentStudyAI.Controllers
             IFileStorageService fileStorageService,
             IFileProcessingService fileProcessingService,
             IDatabaseService databaseService,
+            FileValidator fileValidator,
             ILogger<FileGroupingController> logger)
         {
             _subjectGroupService = subjectGroupService;
             _fileStorageService = fileStorageService;
             _fileProcessingService = fileProcessingService;
             _databaseService = databaseService;
+            _fileValidator = fileValidator;
             _logger = logger;
         }
 
@@ -33,39 +37,101 @@ namespace StudentStudyAI.Controllers
         {
             try
             {
-                // Validate file
-                if (file == null || file.Length == 0)
+                // Handle guest users - use ID 0 for guests
+                int userIdInt;
+                if (userId.ToLower() == "guest" || string.IsNullOrEmpty(userId))
                 {
-                    return BadRequest(new { error = "No file provided", message = "Please select a file to upload" });
+                    userIdInt = 1; // Guest user ID
+                    
+                    // Ensure guest user exists in database
+                    var existingGuest = await _databaseService.GetUserByIdAsync(1);
+                    if (existingGuest == null)
+                    {
+                        _logger.LogInformation("Guest user not found, creating guest user with ID 1");
+                        // Create guest user directly with ID 1
+                        using var connection = await ((DatabaseService)_databaseService).GetConnectionAsync();
+                        
+                        // First try to insert with ID 1
+                        var command = new MySqlCommand(@"
+                            INSERT INTO Users (Id, Username, Email, PasswordHash, CreatedAt, LastLoginAt, IsActive)
+                            VALUES (1, 'guest', 'guest@system.local', '', NOW(), NOW(), TRUE)
+                        ", connection);
+                        
+                        try
+                        {
+                            await command.ExecuteNonQueryAsync();
+                            _logger.LogInformation("Guest user inserted with ID 1");
+                        }
+                        catch (MySqlException ex) when (ex.Number == 1062) // Duplicate key error
+                        {
+                            _logger.LogInformation("Guest user already exists, continuing");
+                        }
+                        catch (MySqlException ex) when (ex.Number == 1364) // Field doesn't have a default value
+                        {
+                            _logger.LogWarning("Cannot insert with ID 0, trying without specifying ID");
+                            // Try without specifying ID and let it auto-increment
+                            command = new MySqlCommand(@"
+                                INSERT INTO Users (Username, Email, PasswordHash, CreatedAt, LastLoginAt, IsActive)
+                                VALUES ('guest', 'guest@system.local', '', NOW(), NOW(), TRUE)
+                            ", connection);
+                            await command.ExecuteNonQueryAsync();
+                            _logger.LogInformation("Guest user inserted with auto-increment ID");
+                        }
+                        _logger.LogInformation("Guest user creation command executed");
+                        
+                        // Verify the guest user was created
+                        var verifyGuest = await _databaseService.GetUserByIdAsync(1);
+                        if (verifyGuest == null)
+                        {
+                            _logger.LogError("Failed to create guest user - still null after creation attempt");
+                        }
+                        else
+                        {
+                            _logger.LogInformation("Guest user successfully created and verified");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Guest user already exists");
+                    }
+                }
+                else if (!int.TryParse(userId, out userIdInt))
+                {
+                    return BadRequest(new { error = "Invalid user ID", message = "User ID must be a valid number or 'guest'" });
                 }
 
-                // Validate and convert userId
-                if (!int.TryParse(userId, out int userIdInt))
-                {
-                    return BadRequest(new { error = "Invalid user ID", message = "User ID must be a valid number" });
-                }
-
-                // Validate file using processing service
-                if (!await _fileProcessingService.ValidateFileAsync(file))
+                // Validate file using FileValidator
+                var validationResult = _fileValidator.ValidateFile(file, userIdInt);
+                if (!validationResult.IsValid)
                 {
                     return BadRequest(new { 
-                        error = "Invalid file", 
-                        message = "File validation failed. Please check file type and size." 
+                        error = "File validation failed", 
+                        message = validationResult.ErrorMessage 
                     });
                 }
 
-                // Save file to storage
+                // Additional content validation
+                if (!await _fileValidator.ValidateFileContent(file))
+                {
+                    return BadRequest(new { 
+                        error = "File content validation failed", 
+                        message = "File content appears to be unsafe or malicious" 
+                    });
+                }
+
+                // Save file to storage using sanitized filename
                 var filePath = await _fileStorageService.SaveFileAsync(file, userIdInt);
-                var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+                var fileExtension = Path.GetExtension(validationResult.SanitizedFileName).ToLowerInvariant();
 
                 // Create file upload record
                 var fileUpload = new FileUpload
                 {
                     UserId = userIdInt,
-                    FileName = file.FileName,
+                    FileName = validationResult.SanitizedFileName, // Use sanitized filename
+                    OriginalFileName = validationResult.OriginalFileName, // Store original for display
                     FilePath = filePath,
                     FileType = fileExtension,
-                    FileSize = file.Length,
+                    FileSize = validationResult.FileSize,
                     Subject = subject,
                     StudentLevel = studentLevel,
                     UploadedAt = DateTime.UtcNow,
@@ -508,6 +574,90 @@ namespace StudentStudyAI.Controllers
             {
                 _logger.LogError(ex, "Error restoring file {FileId}", fileId);
                 return Problem($"Error restoring file: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{fileId}/download")]
+        public async Task<IActionResult> DownloadFile(int fileId)
+        {
+            try
+            {
+                _logger.LogInformation("Downloading file {FileId}", fileId);
+                
+                var file = await _databaseService.GetFileUploadAsync(fileId);
+                if (file == null)
+                {
+                    _logger.LogWarning("File {FileId} not found", fileId);
+                    return NotFound("File not found");
+                }
+
+                var filePath = file.FilePath;
+                if (!System.IO.File.Exists(filePath))
+                {
+                    _logger.LogWarning("File {FileId} not found on server at path: {FilePath}", fileId, filePath);
+                    return NotFound("File not found on server");
+                }
+
+                var fileStream = System.IO.File.OpenRead(filePath);
+                var contentType = _fileStorageService.GetContentType(System.IO.Path.GetExtension(file.FileName));
+                
+                _logger.LogInformation("Successfully serving file {FileId}: {FileName}", fileId, file.FileName);
+                return File(fileStream, contentType, file.FileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error downloading file {FileId}", fileId);
+                return Problem($"Error downloading file: {ex.Message}");
+            }
+        }
+
+        [HttpPost("reorganize/{userId}")]
+        public async Task<IActionResult> ReorganizeFiles(int userId)
+        {
+            try
+            {
+                _logger.LogInformation("Reorganizing files for user {UserId}", userId);
+                
+                // Get all files for the user
+                var files = await _databaseService.GetFileUploadsByUserIdAsync(userId);
+                var contextService = HttpContext.RequestServices.GetRequiredService<ContextService>();
+                
+                int reorganizedCount = 0;
+                
+                foreach (var file in files.Where(f => !f.IsDeleted && !string.IsNullOrEmpty(f.ExtractedContent)))
+                {
+                    try
+                    {
+                        // Re-detect subject and topic
+                        var detectedSubject = contextService.DetectSubjectFromContent(file.ExtractedContent);
+                        var detectedTopic = contextService.DetectTopicFromContent(file.ExtractedContent);
+                        
+                        // Update file with new detection
+                        var updateResult = await _databaseService.UpdateFileAutoDetectionAsync(file.Id, detectedSubject, detectedTopic);
+                        if (updateResult)
+                        {
+                            reorganizedCount++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to reorganize file {FileId}", file.Id);
+                    }
+                }
+                
+                _logger.LogInformation("Reorganized {Count} files for user {UserId}", reorganizedCount, userId);
+                
+                return Ok(new { 
+                    success = true, 
+                    message = $"Reorganized {reorganizedCount} files successfully",
+                    reorganizedCount = reorganizedCount,
+                    totalFiles = files.Count(f => !f.IsDeleted)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reorganizing files for user {UserId}", userId);
+                return Problem($"Error reorganizing files: {ex.Message}");
             }
         }
     }

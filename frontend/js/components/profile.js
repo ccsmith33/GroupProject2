@@ -352,3 +352,5 @@ class Profile {
     this.loadData();
   }
 }
+
+export default Profile;

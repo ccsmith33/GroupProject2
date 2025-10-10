@@ -15,21 +15,22 @@ class Header {
   render() {
     this.container.innerHTML = `
       <nav class="navbar navbar-expand-lg navbar-light studyspree-navbar">
-        <div class="container">
-          <a class="navbar-brand" href="#" id="homeTab">StudySpree</a>
-          
-          <!-- Centralized Navigation Tabs -->
-          <div class="navbar-nav mx-auto">
-            <a class="nav-link" href="#" id="homeNavTab">Home</a>
-            <a class="nav-link" href="#" id="aboutTab">About</a>
-            <a class="nav-link" href="#" id="studyTab">Study Aids</a>
-            <a class="nav-link" href="#" id="uploadTab">Upload Documents</a>
-            <a class="nav-link" href="#" id="profileTab">Profile</a>
+        <div class="container d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <a class="navbar-brand me-4" href="#" id="homeTab">StudySpree</a>
+            
+            <!-- Navigation Tabs -->
+            <div class="navbar-nav d-flex flex-row">
+              <a class="nav-link me-3" href="#" id="aboutTab">About</a>
+              <a class="nav-link me-3" href="#" id="studyTab">Study Aids</a>
+              <a class="nav-link me-3" href="#" id="uploadTab">Upload Documents</a>
+              <a class="nav-link me-3" href="#" id="profileTab">Profile</a>
+            </div>
           </div>
           
           <!-- Auth Buttons -->
-          <div class="navbar-nav">
-            <a class="nav-link" href="#" id="loginBtn" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
+          <div class="navbar-nav d-flex flex-row">
+            <a class="nav-link me-3" href="#" id="loginBtn" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
             <a class="nav-link" href="#" id="signupBtn" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
           </div>
         </div>
@@ -180,14 +181,6 @@ class Header {
       });
     }
 
-    const homeNavTab = document.getElementById("homeNavTab");
-    if (homeNavTab) {
-      homeNavTab.addEventListener("click", (e) => {
-        e.preventDefault();
-        this.handleTabClick("home");
-      });
-    }
-
     const aboutTab = document.getElementById("aboutTab");
     if (aboutTab) {
       aboutTab.addEventListener("click", (e) => {
@@ -257,19 +250,19 @@ class Header {
   handleTabClick(tabName) {
     // Remove active class from all tabs
     const allTabs = document.querySelectorAll('.nav-link[id$="Tab"]');
-    allTabs.forEach(tab => {
-      tab.classList.remove('active');
+    allTabs.forEach((tab) => {
+      tab.classList.remove("active");
     });
 
     // Add active class to clicked tab
     const activeTab = document.getElementById(`${tabName}Tab`);
     if (activeTab) {
-      activeTab.classList.add('active');
+      activeTab.classList.add("active");
     }
 
     // Dispatch custom event for other components to handle tab switching
     const event = new CustomEvent("tabChanged", {
-      detail: { activeTab: tabName }
+      detail: { activeTab: tabName },
     });
     document.dispatchEvent(event);
 
@@ -278,11 +271,7 @@ class Header {
 
   // Set initial active tab
   setInitialActiveTab() {
-    // Set Home tab as active by default
-    const homeTab = document.getElementById("homeNavTab");
-    if (homeTab) {
-      homeTab.classList.add('active');
-    }
+    // No default active tab - StudySpree brand handles home navigation
   }
 
   async handleLogin() {
@@ -298,19 +287,19 @@ class Header {
     try {
       // Simulate API call - replace with actual API
       const response = await this.mockLogin(email, password);
-      
+
       if (response.success) {
         this.isLoggedIn = true;
         this.updateNavbar();
         this.closeModal("loginModal");
         this.showSuccess("Login successful!");
-        
+
         // Store user data
         if (rememberMe) {
           localStorage.setItem("userData", JSON.stringify(response.user));
         }
         sessionStorage.setItem("userData", JSON.stringify(response.user));
-        
+
         // Dispatch event
         this.dispatchAuthEvent();
       } else {
@@ -327,7 +316,9 @@ class Header {
     const email = document.getElementById("signupEmail").value;
     const school = document.getElementById("signupSchool").value;
     const password = document.getElementById("signupPassword").value;
-    const confirmPassword = document.getElementById("signupConfirmPassword").value;
+    const confirmPassword = document.getElementById(
+      "signupConfirmPassword"
+    ).value;
     const agreeTerms = document.getElementById("agreeTerms").checked;
 
     // Validation
@@ -354,16 +345,16 @@ class Header {
     try {
       // Simulate API call - replace with actual API
       const response = await this.mockSignup({ name, email, school, password });
-      
+
       if (response.success) {
         this.isLoggedIn = true;
         this.updateNavbar();
         this.closeModal("signupModal");
         this.showSuccess("Account created successfully!");
-        
+
         // Store user data
         sessionStorage.setItem("userData", JSON.stringify(response.user));
-        
+
         // Dispatch event
         this.dispatchAuthEvent();
       } else {
@@ -377,9 +368,11 @@ class Header {
 
   validatePasswordMatch() {
     const password = document.getElementById("signupPassword").value;
-    const confirmPassword = document.getElementById("signupConfirmPassword").value;
+    const confirmPassword = document.getElementById(
+      "signupConfirmPassword"
+    ).value;
     const confirmField = document.getElementById("signupConfirmPassword");
-    
+
     if (confirmPassword && password !== confirmPassword) {
       confirmField.setCustomValidity("Passwords do not match");
     } else {
@@ -390,7 +383,7 @@ class Header {
   updateNavbar() {
     const loginBtn = document.getElementById("loginBtn");
     const signupBtn = document.getElementById("signupBtn");
-    
+
     if (this.isLoggedIn) {
       loginBtn.textContent = "Logout";
       loginBtn.onclick = (e) => {
@@ -436,7 +429,7 @@ class Header {
     }
     errorDiv.textContent = message;
     errorDiv.style.display = "block";
-    
+
     setTimeout(() => {
       errorDiv.style.display = "none";
     }, 5000);
@@ -453,7 +446,7 @@ class Header {
     }
     successDiv.textContent = message;
     successDiv.style.display = "block";
-    
+
     setTimeout(() => {
       successDiv.style.display = "none";
     }, 3000);
@@ -461,7 +454,7 @@ class Header {
 
   dispatchAuthEvent() {
     const event = new CustomEvent("authStateChanged", {
-      detail: { isLoggedIn: this.isLoggedIn }
+      detail: { isLoggedIn: this.isLoggedIn },
     });
     document.dispatchEvent(event);
   }
@@ -469,8 +462,8 @@ class Header {
   // Mock API functions - replace with actual API calls
   async mockLogin(email, password) {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Mock validation
     if (email === "test@example.com" && password === "password123") {
       return {
@@ -479,37 +472,37 @@ class Header {
           id: 1,
           name: "Test User",
           email: email,
-          school: "Harvard University"
-        }
+          school: "Harvard University",
+        },
       };
     } else {
       return {
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
       };
     }
   }
 
   async mockSignup(userData) {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Mock validation
     if (userData.email === "existing@example.com") {
       return {
         success: false,
-        message: "Email already exists"
+        message: "Email already exists",
       };
     }
-    
+
     return {
       success: true,
       user: {
         id: Math.floor(Math.random() * 1000),
         name: userData.name,
         email: userData.email,
-        school: userData.school
-      }
+        school: userData.school,
+      },
     };
   }
 
@@ -517,3 +510,5 @@ class Header {
     return this.isLoggedIn;
   }
 }
+
+export default Header;

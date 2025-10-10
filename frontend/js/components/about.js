@@ -223,8 +223,7 @@ class AboutPage {
     const aboutLearnMoreBtn = document.getElementById("aboutLearnMoreBtn");
     if (aboutLearnMoreBtn) {
       aboutLearnMoreBtn.addEventListener("click", () => {
-        // TODO: Implement contact modal or redirect to contact page
-        showNotification("Contact feature coming soon!", "info");
+        this.showContactModal();
       });
     }
   }
@@ -238,7 +237,9 @@ class AboutPage {
         student.classList.add("animate");
       });
 
-      const studyElements = document.querySelectorAll(".study-book, .study-laptop, .study-lightbulb");
+      const studyElements = document.querySelectorAll(
+        ".study-book, .study-laptop, .study-lightbulb"
+      );
       studyElements.forEach((element, index) => {
         element.style.animationDelay = `${index * 0.3}s`;
         element.classList.add("animate");
@@ -255,7 +256,87 @@ class AboutPage {
 
   emit(event, data) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(callback => callback(data));
+      this.eventListeners[event].forEach((callback) => callback(data));
     }
   }
+
+  showContactModal() {
+    // Create and show contact modal
+    const modalHTML = `
+      <div class="modal fade" id="contactModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Contact Us</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="contactForm">
+                <div class="mb-3">
+                  <label for="contactName" class="form-label">Name</label>
+                  <input type="text" class="form-control" id="contactName" required>
+                </div>
+                <div class="mb-3">
+                  <label for="contactEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control" id="contactEmail" required>
+                </div>
+                <div class="mb-3">
+                  <label for="contactMessage" class="form-label">Message</label>
+                  <textarea class="form-control" id="contactMessage" rows="4" required></textarea>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" id="sendContactBtn">Send Message</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Remove existing modal if present
+    const existingModal = document.getElementById("contactModal");
+    if (existingModal) {
+      existingModal.remove();
+    }
+
+    // Add modal to DOM
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+    // Initialize and show modal
+    const modalElement = document.getElementById("contactModal");
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    // Handle form submission
+    document.getElementById("sendContactBtn").addEventListener("click", () => {
+      const form = document.getElementById("contactForm");
+      if (form.checkValidity()) {
+        const formData = {
+          name: document.getElementById("contactName").value,
+          email: document.getElementById("contactEmail").value,
+          message: document.getElementById("contactMessage").value,
+        };
+
+        // TODO: Send contact form data to backend
+        console.log("Contact form data:", formData);
+
+        modal.hide();
+        showNotification(
+          "Thank you for contacting us! We'll get back to you soon.",
+          "success"
+        );
+      } else {
+        form.reportValidity();
+      }
+    });
+
+    // Clean up modal after it's hidden
+    modalElement.addEventListener("hidden.bs.modal", () => {
+      modalElement.remove();
+    });
+  }
 }
+
+export default AboutPage;

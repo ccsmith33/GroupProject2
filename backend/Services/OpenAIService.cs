@@ -12,7 +12,8 @@ namespace StudentStudyAI.Services
         private readonly ILogger<OpenAIService> _logger;
         private readonly string _apiKey;
         private readonly string _baseUrl;
-        private readonly string _model;
+        private readonly string _guestModel;
+        private readonly string _authenticatedModel;
         private readonly int _maxTokens;
         private readonly double _temperature;
 
@@ -23,12 +24,18 @@ namespace StudentStudyAI.Services
             _logger = logger;
             _apiKey = _configuration["OpenAI:ApiKey"] ?? "mock-key";
             _baseUrl = _configuration["OpenAI:BaseUrl"] ?? "https://api.openai.com/v1";
-            _model = _configuration["OpenAI:Model"] ?? "gpt-5-nano";
+            _guestModel = _configuration["OpenAI:Models:Guest"] ?? "gpt-5-nano";
+            _authenticatedModel = _configuration["OpenAI:Models:Authenticated"] ?? "gpt-5";
             _maxTokens = int.Parse(_configuration["OpenAI:MaxTokens"] ?? "2000");
             _temperature = double.Parse(_configuration["OpenAI:Temperature"] ?? "0.7");
         }
 
-        public async Task<string> GenerateStudyGuideAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, string? subject = null, string? topic = null)
+        private string GetModelForUser(bool isAuthenticated)
+        {
+            return isAuthenticated ? _authenticatedModel : _guestModel;
+        }
+
+        public async Task<string> GenerateStudyGuideAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, string? subject = null, string? topic = null, bool isAuthenticated = false)
         {
             var context = BuildContextString(contextFiles, contextStudyGuides, subject, topic);
             var systemPrompt = BuildStudyGuideSystemPrompt(subject, topic);
@@ -39,10 +46,10 @@ namespace StudentStudyAI.Services
                 new { role = "user", content = $"{context}\n\nUser Request: {userPrompt}" }
             };
 
-            return await CallOpenAIAsync(messages);
+            return await CallOpenAIAsync(messages, isAuthenticated);
         }
 
-        public async Task<string> GenerateQuizAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, string? subject = null, string? topic = null, int? questionCount = null, KnowledgeLevel? knowledgeLevel = null)
+        public async Task<string> GenerateQuizAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, string? subject = null, string? topic = null, int? questionCount = null, KnowledgeLevel? knowledgeLevel = null, bool isAuthenticated = false)
         {
             var context = BuildContextString(contextFiles, contextStudyGuides, subject, topic);
             var systemPrompt = BuildDynamicQuizSystemPrompt(subject, topic, questionCount, knowledgeLevel);
@@ -53,11 +60,11 @@ namespace StudentStudyAI.Services
                 new { role = "user", content = $"{context}\n\nUser Request: {userPrompt}" }
             };
 
-            return await CallOpenAIAsync(messages);
+            return await CallOpenAIAsync(messages, isAuthenticated);
         }
 
 
-        public async Task<string> GenerateConversationalResponseAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, List<Conversation> recentConversations, string? subject = null, string? topic = null)
+        public async Task<string> GenerateConversationalResponseAsync(string userPrompt, List<FileUpload> contextFiles, List<StudyGuide> contextStudyGuides, List<Conversation> recentConversations, string? subject = null, string? topic = null, bool isAuthenticated = false)
         {
             var context = BuildContextString(contextFiles, contextStudyGuides, subject, topic);
             var conversationHistory = BuildConversationHistory(recentConversations);
@@ -78,10 +85,10 @@ namespace StudentStudyAI.Services
             // Add current context and prompt
             messages.Add(new { role = "user", content = $"{context}\n\n{conversationHistory}\n\nCurrent Request: {userPrompt}" });
 
-            return await CallOpenAIAsync(messages);
+            return await CallOpenAIAsync(messages, isAuthenticated);
         }
 
-        private async Task<string> CallOpenAIAsync(List<object> messages)
+        private async Task<string> CallOpenAIAsync(List<object> messages, bool isAuthenticated = false)
         {
             // For development, return mock data if no API key
             if (_apiKey == "mock-key" || string.IsNullOrEmpty(_apiKey))
@@ -89,23 +96,36 @@ namespace StudentStudyAI.Services
                 return GenerateMockResponse(messages);
             }
 
+            var model = GetModelForUser(isAuthenticated);
             var requestBody = new
             {
-                model = _model,
+                model = model,
                 messages = messages,
-                max_tokens = 2000,
-                temperature = 0.7
+                max_completion_tokens = 2000,
+                temperature = 1.0
             };
 
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
+            // Clear any existing headers to avoid conflicts
+            _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _apiKey);
+
+            // Add debugging
+            _logger.LogInformation("Making OpenAI API call with model: {Model}", model);
+            _logger.LogInformation("API Key starts with: {ApiKeyStart}", _apiKey?.Substring(0, Math.Min(10, _apiKey?.Length ?? 0)) ?? "null");
+            _logger.LogInformation("Request URL: {Url}", $"{_baseUrl}/chat/completions");
 
             string responseContent = "";
             try
             {
                 var response = await _httpClient.PostAsync($"{_baseUrl}/chat/completions", content);
+                
+                // Log response details for debugging
+                _logger.LogInformation("Response status: {StatusCode}", response.StatusCode);
+                _logger.LogInformation("Response headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}")));
+                
                 response.EnsureSuccessStatusCode();
 
                 responseContent = await response.Content.ReadAsStringAsync();
@@ -130,9 +150,28 @@ namespace StudentStudyAI.Services
                 // Fallback to mock data on JSON parsing failure
                 return GenerateMockResponse(messages);
             }
+            catch (HttpRequestException httpEx)
+            {
+                _logger.LogError(httpEx, "OpenAI API HTTP error: {Message}", httpEx.Message);
+                
+                // Try to get the response content for more details
+                try
+                {
+                    var response = await _httpClient.PostAsync($"{_baseUrl}/chat/completions", content);
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("OpenAI API error response: {ErrorResponse}", errorContent);
+                }
+                catch (Exception ex2)
+                {
+                    _logger.LogError(ex2, "Failed to get error response details");
+                }
+                
+                // Fallback to mock data on API failure
+                return GenerateMockResponse(messages);
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "OpenAI API call failed");
+                _logger.LogError(ex, "OpenAI API call failed: {Message}", ex.Message);
                 // Fallback to mock data on API failure
                 return GenerateMockResponse(messages);
             }
@@ -361,7 +400,7 @@ EXPANSION APPROACH:
             }
         }
 
-        public async Task<FileAnalysis> AnalyzeFileContentAsync(FileUpload file, string? subject = null, string? topic = null)
+        public async Task<FileAnalysis> AnalyzeFileContentAsync(FileUpload file, string? subject = null, string? topic = null, bool isAuthenticated = false)
         {
             if (file == null)
             {
@@ -385,7 +424,7 @@ EXPANSION APPROACH:
                 new { role = "user", content = $"Analyze this content:\n\n{content}" }
             };
 
-            var response = await CallOpenAIAsync(messages);
+            var response = await CallOpenAIAsync(messages, isAuthenticated);
             
             // Parse the response into FileAnalysis
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());

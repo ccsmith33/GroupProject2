@@ -1,4 +1,6 @@
 // Analysis component for displaying analysis results
+import { analysisAPI } from "../api/analysis.js";
+
 class Analysis {
   constructor(container) {
     this.container = container;
@@ -110,19 +112,26 @@ class Analysis {
     this.showLoadingState();
 
     try {
-      // Combine all file contents for analysis
-      let combinedContent = "";
-      for (const fileObj of data.files) {
-        const content = await this.readFileContent(fileObj.file);
-        combinedContent += `\n\n--- ${fileObj.name} ---\n${content}`;
+      // If files have IDs, they're already uploaded
+      // Call the analysis API for each file
+      if (data.files[0]?.id) {
+        const analysisPromises = data.files.map((file) =>
+          analysisAPI.analyzeFile(file.id)
+        );
+        const results = await Promise.all(analysisPromises);
+
+        // Display first result or combine results
+        this.displayResults(results[0]);
+        this.emit("analysisComplete", results[0]);
+      } else {
+        // Fallback to mock if no file IDs
+        const result = this.getMockAnalysisResult(
+          data.subject,
+          data.studentLevel
+        );
+        this.displayResults(result);
+        this.emit("analysisComplete", result);
       }
-
-      // Use mock data for now instead of API
-      const result = this.getMockAnalysisResult(data.subject, data.studentLevel);
-
-      this.displayResults(result);
-      this.emit("analysisComplete", result);
-
     } catch (error) {
       console.error("Analysis failed:", error);
       this.showError("Analysis failed. Please try again.");
@@ -140,36 +149,36 @@ class Analysis {
         strengths: [
           "Good problem-solving approach",
           "Clear explanations",
-          "Logical reasoning"
+          "Logical reasoning",
         ],
         weakAreas: [
           "Need more practice with complex problems",
-          "Work on showing all steps clearly"
+          "Work on showing all steps clearly",
         ],
         recommendations: [
           "Practice more similar problems",
           "Review fundamental concepts",
-          "Ask for help when stuck"
-        ]
+          "Ask for help when stuck",
+        ],
       },
       detailedAnalysis: {
         conceptUnderstanding: Math.floor(Math.random() * 30) + 70,
         problemSolving: Math.floor(Math.random() * 30) + 70,
         completeness: Math.floor(Math.random() * 30) + 70,
-        accuracy: Math.floor(Math.random() * 30) + 70
+        accuracy: Math.floor(Math.random() * 30) + 70,
       },
       studyPlan: {
         priorityTopics: [
           "Advanced problem solving",
           "Concept application",
-          "Practice exercises"
+          "Practice exercises",
         ],
         nextSteps: [
           "Complete practice problems",
           "Review weak areas",
-          "Seek additional help"
-        ]
-      }
+          "Seek additional help",
+        ],
+      },
     };
   }
 
@@ -208,7 +217,9 @@ class Analysis {
     const scoreElement = document.getElementById("analysisScore");
     if (scoreElement) {
       scoreElement.textContent = `${result.overallScore}%`;
-      scoreElement.className = `badge ${this.getScoreClass(result.overallScore)} fs-6`;
+      scoreElement.className = `badge ${this.getScoreClass(
+        result.overallScore
+      )} fs-6`;
     }
 
     // Update summary
@@ -218,9 +229,18 @@ class Analysis {
     }
 
     // Update detailed scores
-    this.updateScoreElement("conceptScore", result.detailedAnalysis.conceptUnderstanding);
-    this.updateScoreElement("problemScore", result.detailedAnalysis.problemSolving);
-    this.updateScoreElement("completenessScore", result.detailedAnalysis.completeness);
+    this.updateScoreElement(
+      "conceptScore",
+      result.detailedAnalysis.conceptUnderstanding
+    );
+    this.updateScoreElement(
+      "problemScore",
+      result.detailedAnalysis.problemSolving
+    );
+    this.updateScoreElement(
+      "completenessScore",
+      result.detailedAnalysis.completeness
+    );
     this.updateScoreElement("accuracyScore", result.detailedAnalysis.accuracy);
 
     // Update lists
@@ -269,7 +289,9 @@ class Analysis {
       } else {
         // For non-text files, just return filename and basic info
         resolve(
-          `[File: ${file.name}, Type: ${file.type}, Size: ${this.formatFileSize(file.size)}]`
+          `[File: ${file.name}, Type: ${file.type}, Size: ${this.formatFileSize(
+            file.size
+          )}]`
         );
       }
     });
@@ -310,7 +332,9 @@ class Analysis {
 
   emit(event, data) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(callback => callback(data));
+      this.eventListeners[event].forEach((callback) => callback(data));
     }
   }
 }
+
+export default Analysis;
