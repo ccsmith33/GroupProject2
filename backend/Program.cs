@@ -129,7 +129,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddMemoryCache();
 
 // Add background services
-builder.Services.AddScoped<BackgroundJobService>();
+builder.Services.AddSingleton<BackgroundJobService>();
 builder.Services.AddHostedService<BackgroundJobService>();
 
 // Add CORS for frontend development

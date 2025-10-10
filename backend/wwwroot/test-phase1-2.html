@@ -229,9 +229,84 @@
         ></div>
       </div>
 
+      <!-- Knowledge Tracking Test Section -->
+      <div class="test-section">
+        <h3>6. Knowledge Tracking Test</h3>
+        <p>
+          Test user knowledge profiles, quiz performance, and learning
+          progression.
+        </p>
+
+        <div>
+          <button class="test-button" onclick="testKnowledgeProfiles()">
+            Test Knowledge Profiles
+          </button>
+          <button class="test-button" onclick="testQuizPerformance()">
+            Test Quiz Performance
+          </button>
+          <button class="test-button" onclick="testLearningProgression()">
+            Test Learning Progression
+          </button>
+          <button class="test-button" onclick="testLearningPreferences()">
+            Test Learning Preferences
+          </button>
+        </div>
+
+        <div
+          id="knowledgeTrackingResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- Study Guide & Chat Test Section -->
+      <div class="test-section">
+        <h3>7. Study Guide & Chat Test</h3>
+        <p>Test study guide generation and chat functionality.</p>
+
+        <div>
+          <button class="test-button" onclick="testStudyGuideGeneration()">
+            Test Study Guide Generation
+          </button>
+          <button class="test-button" onclick="testChatFunctionality()">
+            Test Chat Functionality
+          </button>
+          <button class="test-button" onclick="testQuizAttempts()">
+            Test Quiz Attempts
+          </button>
+        </div>
+
+        <div
+          id="studyGuideChatResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
+      <!-- Content Analysis Test Section -->
+      <div class="test-section">
+        <h3>8. Content Difficulty Analysis Test</h3>
+        <p>Test the content analysis service for difficulty assessment.</p>
+
+        <div>
+          <button class="test-button" onclick="testContentDifficultyAnalysis()">
+            Test Content Difficulty Analysis
+          </button>
+          <button class="test-button" onclick="testContentAnalysisService()">
+            Test Content Analysis Service
+          </button>
+        </div>
+
+        <div
+          id="contentDifficultyResult"
+          class="result"
+          style="display: none"
+        ></div>
+      </div>
+
       <!-- API Endpoints Test Section -->
       <div class="test-section">
-        <h3>6. API Endpoints Test</h3>
+        <h3>9. API Endpoints Test</h3>
         <p>Test all new API endpoints for file grouping functionality.</p>
 
         <div>
@@ -277,17 +352,49 @@
             options.body = JSON.stringify(body);
           }
 
-          const response = await fetch(`${API_BASE}${endpoint}`, options);
-          const data = await response.json();
+          const fullUrl = `${API_BASE}${endpoint}`;
+          console.log(`🌐 Making API call: ${method} ${fullUrl}`);
+
+          const response = await fetch(fullUrl, options);
+          console.log(
+            `📡 Response status: ${response.status} ${response.statusText}`
+          );
+          console.log(
+            `📡 Response headers:`,
+            Object.fromEntries(response.headers.entries())
+          );
+
+          let data;
+          try {
+            const text = await response.text();
+            console.log(`📄 Raw response text:`, text);
+            data = text ? JSON.parse(text) : {};
+          } catch (parseError) {
+            console.error(`❌ JSON parse error:`, parseError);
+            return {
+              success: false,
+              status: response.status,
+              data: null,
+              error: `JSON parse error: ${parseError.message}`,
+            };
+          }
+
+          console.log(`📊 Parsed response data:`, data);
 
           return {
             success: response.ok,
             status: response.status,
             data: data,
+            error: response.ok
+              ? null
+              : data.message || data.error || "Unknown error",
           };
         } catch (error) {
+          console.error("❌ API call failed:", error);
           return {
             success: false,
+            status: 0,
+            data: null,
             error: error.message,
           };
         }
@@ -896,6 +1003,288 @@
           message,
           errorCount === errorTests.length ? "success" : "error"
         );
+      }
+
+      // 6. Knowledge Tracking Test Functions
+      async function testKnowledgeProfiles() {
+        showLoading("knowledgeTrackingResult", "Testing knowledge profiles...");
+
+        const result = await apiCall("/knowledge/1/analytics");
+
+        if (result.success) {
+          let message = `<strong>Knowledge Profiles Test</strong><br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("knowledgeTrackingResult", message, "success");
+        } else {
+          showResult(
+            "knowledgeTrackingResult",
+            `Knowledge profiles test failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testQuizPerformance() {
+        showLoading("knowledgeTrackingResult", "Testing quiz performance...");
+
+        const result = await apiCall("/knowledge/performance", "POST", {
+          userId: 1,
+          quizId: 1,
+          score: 85,
+          timeSpent: 300,
+          correctAnswers: 8,
+          totalQuestions: 10,
+        });
+
+        if (result.success) {
+          let message = `<strong>Quiz Performance Test</strong><br>`;
+          message += `Performance logged successfully<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("knowledgeTrackingResult", message, "success");
+        } else {
+          showResult(
+            "knowledgeTrackingResult",
+            `Quiz performance test failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testLearningProgression() {
+        showLoading(
+          "knowledgeTrackingResult",
+          "Testing learning progression..."
+        );
+
+        const result = await apiCall("/knowledge/1/progression");
+
+        if (result.success) {
+          let message = `<strong>Learning Progression Test</strong><br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("knowledgeTrackingResult", message, "success");
+        } else {
+          showResult(
+            "knowledgeTrackingResult",
+            `Learning progression test failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testLearningPreferences() {
+        showLoading(
+          "knowledgeTrackingResult",
+          "Testing learning preferences..."
+        );
+
+        const result = await apiCall("/knowledge/1/preferences");
+
+        if (result.success) {
+          let message = `<strong>Learning Preferences Test</strong><br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("knowledgeTrackingResult", message, "success");
+        } else {
+          showResult(
+            "knowledgeTrackingResult",
+            `Learning preferences test failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      // 7. Study Guide & Chat Test Functions
+      async function testStudyGuideGeneration() {
+        showLoading(
+          "studyGuideChatResult",
+          "Testing study guide generation..."
+        );
+
+        const result = await apiCall("/analysis/generate-study-guide", "POST", {
+          userPrompt: "Create a study guide for database systems",
+          userId: 1,
+        });
+
+        if (result.success) {
+          let message = `<strong>Study Guide Generation Test</strong><br>`;
+          message += `Title: ${result.data.title}<br>`;
+          message += `Subject: ${result.data.subject || "N/A"}<br>`;
+          message += `Content Length: ${
+            result.data.content?.length || 0
+          } characters<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("studyGuideChatResult", message, "success");
+        } else {
+          showResult(
+            "studyGuideChatResult",
+            `Study guide generation failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testChatFunctionality() {
+        showLoading("studyGuideChatResult", "Testing chat functionality...");
+
+        const result = await apiCall("/analysis/chat", "POST", {
+          Message: "Explain the concept of database normalization",
+          userId: 1,
+        });
+
+        if (result.success) {
+          let message = `<strong>Chat Functionality Test</strong><br>`;
+          message += `Response Length: ${
+            result.data.response?.length || 0
+          } characters<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("studyGuideChatResult", message, "success");
+        } else {
+          showResult(
+            "studyGuideChatResult",
+            `Chat functionality failed: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      async function testQuizAttempts() {
+        showLoading("studyGuideChatResult", "Testing quiz attempts...");
+
+        // First generate a quiz
+        const quizResult = await apiCall("/analysis/generate-quiz", "POST", {
+          userPrompt: "Create a quiz about database systems",
+          userId: 1,
+        });
+
+        if (!quizResult.success) {
+          showResult(
+            "studyGuideChatResult",
+            `Failed to generate quiz for attempt test: ${quizResult.error}`,
+            "error"
+          );
+          return;
+        }
+
+        // Simulate quiz attempt
+        const attemptData = {
+          quizId: quizResult.data.id,
+          userId: 1,
+          answers: [
+            { questionId: 1, selectedAnswer: "A" },
+            { questionId: 2, selectedAnswer: "B" },
+            { questionId: 3, selectedAnswer: "C" },
+          ],
+          timeSpent: 300,
+        };
+
+        const result = await apiCall(
+          "/analysis/submit-quiz-attempt",
+          "POST",
+          attemptData
+        );
+
+        if (result.success) {
+          let message = `<strong>Quiz Attempt Test</strong><br>`;
+          message += `Score: ${result.data.score}%<br>`;
+          message += `Correct Answers: ${result.data.correctAnswers}/${result.data.totalQuestions}<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("studyGuideChatResult", message, "success");
+        } else {
+          showResult(
+            "studyGuideChatResult",
+            `Quiz attempt failed: ${result.error || result.data.message}`,
+            "error"
+          );
+        }
+      }
+
+      // 8. Content Difficulty Analysis Test Functions
+      async function testContentDifficultyAnalysis() {
+        showLoading(
+          "contentDifficultyResult",
+          "Testing content difficulty analysis..."
+        );
+
+        // Get some files to analyze
+        const filesResult = await apiCall("/files/1/grouped");
+        if (
+          !filesResult.success ||
+          !filesResult.data.data.ungroupedFiles?.length
+        ) {
+          showResult(
+            "contentDifficultyResult",
+            "No files available for difficulty analysis",
+            "error"
+          );
+          return;
+        }
+
+        const file = filesResult.data.data.ungroupedFiles[0];
+        const result = await apiCall(
+          "/knowledge/analyze-content/" + file.id,
+          "POST"
+        );
+
+        if (result.success) {
+          let message = `<strong>Content Difficulty Analysis Test</strong><br>`;
+          message += `File: ${file.fileName}<br>`;
+          message += `Difficulty Score: ${result.data.difficultyScore}<br>`;
+          message += `Knowledge Level: ${result.data.knowledgeLevel}<br>`;
+          message += `Estimated Questions: ${result.data.estimatedQuestions}<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("contentDifficultyResult", message, "success");
+        } else {
+          showResult(
+            "contentDifficultyResult",
+            `Content difficulty analysis failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
+      }
+
+      async function testContentAnalysisService() {
+        showLoading(
+          "contentDifficultyResult",
+          "Testing content analysis service..."
+        );
+
+        const testContent =
+          "This is a complex mathematical equation involving calculus and differential equations. The derivative of x² is 2x, and the integral of 2x is x² + C.";
+
+        const result = await apiCall("/analysis/analyze-file/1", "POST", {
+          content: testContent,
+          userId: 1,
+        });
+
+        if (result.success) {
+          let message = `<strong>Content Analysis Service Test</strong><br>`;
+          message += `Content: "${testContent}"<br>`;
+          message += `Detected Subject: ${result.data.subject}<br>`;
+          message += `Detected Topic: ${result.data.topic}<br>`;
+          message += `Complexity Score: ${result.data.complexityScore}<br>`;
+          message += `Knowledge Level: ${result.data.knowledgeLevel}<br>`;
+          message += `<pre>${JSON.stringify(result.data, null, 2)}</pre>`;
+          showResult("contentDifficultyResult", message, "success");
+        } else {
+          showResult(
+            "contentDifficultyResult",
+            `Content analysis service failed: ${
+              result.error || result.data.message
+            }`,
+            "error"
+          );
+        }
       }
 
       // Initialize page

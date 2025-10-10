@@ -12,7 +12,6 @@ namespace StudentStudyAI.Controllers
         private readonly IFileStorageService _fileStorageService;
         private readonly IFileProcessingService _fileProcessingService;
         private readonly IDatabaseService _databaseService;
-        private readonly BackgroundJobService _backgroundJobService;
         private readonly ILogger<FileGroupingController> _logger;
 
         public FileGroupingController(
@@ -20,14 +19,12 @@ namespace StudentStudyAI.Controllers
             IFileStorageService fileStorageService,
             IFileProcessingService fileProcessingService,
             IDatabaseService databaseService,
-            BackgroundJobService backgroundJobService,
             ILogger<FileGroupingController> logger)
         {
             _subjectGroupService = subjectGroupService;
             _fileStorageService = fileStorageService;
             _fileProcessingService = fileProcessingService;
             _databaseService = databaseService;
-            _backgroundJobService = backgroundJobService;
             _logger = logger;
         }
 
@@ -88,7 +85,8 @@ namespace StudentStudyAI.Controllers
                         ["userId"] = userIdInt
                     }
                 };
-                _backgroundJobService.EnqueueJob(processingJob);
+                var backgroundJobService = HttpContext.RequestServices.GetRequiredService<BackgroundJobService>();
+                backgroundJobService.EnqueueJob(processingJob);
 
                 var response = new
                 {
@@ -442,6 +440,74 @@ namespace StudentStudyAI.Controllers
             {
                 _logger.LogError(ex, "❌ Error processing file {FileId}", fileId);
                 return Problem($"Error processing file: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{fileId}")]
+        public async Task<IActionResult> DeleteFile(int fileId)
+        {
+            try
+            {
+                _logger.LogInformation("Soft deleting file {FileId}", fileId);
+                
+                var file = await _databaseService.GetFileUploadAsync(fileId);
+                if (file == null)
+                {
+                    return NotFound("File not found");
+                }
+
+                // Soft delete - mark as deleted but keep the file
+                file.IsDeleted = true;
+                file.DeletedAt = DateTime.UtcNow;
+                
+                var success = await _databaseService.UpdateFileUploadAsync(file);
+                if (success)
+                {
+                    return Ok(new { success = true, message = "File moved to trash" });
+                }
+                else
+                {
+                    return Problem("Failed to delete file");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting file {FileId}", fileId);
+                return Problem($"Error deleting file: {ex.Message}");
+            }
+        }
+
+        [HttpPost("{fileId}/restore")]
+        public async Task<IActionResult> RestoreFile(int fileId)
+        {
+            try
+            {
+                _logger.LogInformation("Restoring file {FileId}", fileId);
+                
+                var file = await _databaseService.GetFileUploadAsync(fileId);
+                if (file == null)
+                {
+                    return NotFound("File not found");
+                }
+
+                // Restore file
+                file.IsDeleted = false;
+                file.DeletedAt = null;
+                
+                var success = await _databaseService.UpdateFileUploadAsync(file);
+                if (success)
+                {
+                    return Ok(new { success = true, message = "File restored successfully" });
+                }
+                else
+                {
+                    return Problem("Failed to restore file");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring file {FileId}", fileId);
+                return Problem($"Error restoring file: {ex.Message}");
             }
         }
     }

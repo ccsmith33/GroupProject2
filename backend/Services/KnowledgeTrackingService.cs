@@ -124,9 +124,10 @@ namespace StudentStudyAI.Services
             {
                 _logger.LogInformation("Getting knowledge analytics for user {UserId}", userId);
 
-                var profiles = await _databaseService.GetUserKnowledgeProfilesAsync(userId);
-                var recentPerformance = await _databaseService.GetRecentQuizPerformanceAsync(userId, 10);
-                var progressionHistory = await _databaseService.GetKnowledgeProgressionAsync(userId);
+                // Get data with null safety
+                var profiles = await _databaseService.GetUserKnowledgeProfilesAsync(userId) ?? new List<UserKnowledgeProfile>();
+                var recentPerformance = await _databaseService.GetRecentQuizPerformanceAsync(userId, 10) ?? new List<QuizPerformance>();
+                var progressionHistory = await _databaseService.GetKnowledgeProgressionAsync(userId) ?? new List<KnowledgeProgression>();
                 var preferences = await _databaseService.GetUserLearningPreferencesAsync(userId);
 
                 var analytics = new KnowledgeAnalytics
@@ -152,8 +153,18 @@ namespace StudentStudyAI.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting knowledge analytics for user {UserId}", userId);
-                throw;
+                _logger.LogError(ex, "Error getting knowledge analytics for user {UserId}: {ErrorMessage}", userId, ex.Message);
+                
+                // Return empty analytics instead of throwing
+                return new KnowledgeAnalytics
+                {
+                    SubjectProfiles = new Dictionary<string, UserKnowledgeProfile>(),
+                    RecentPerformance = new List<QuizPerformance>(),
+                    ProgressionHistory = new List<KnowledgeProgression>(),
+                    Preferences = null,
+                    SubjectMastery = new Dictionary<string, decimal>(),
+                    RecommendedSubjects = new List<string>()
+                };
             }
         }
 

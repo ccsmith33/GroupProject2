@@ -365,8 +365,12 @@ namespace StudentStudyAI.Services
             var historyIndicators = new[] { "war", "battle", "revolution", "empire", "kingdom", "century", "ancient", "medieval", "renaissance", "industrial", "colonial", "independence", "treaty", "government", "political", "social", "economic", "cultural" };
             subjectScores["History"] = CountOccurrences(lowerContent, historyIndicators);
 
-            // Computer Science indicators
-            var csIndicators = new[] { "algorithm", "programming", "code", "software", "database", "network", "security", "artificial intelligence", "machine learning", "data structure", "function", "variable", "loop", "array", "object", "class", "method" };
+            // Business/Management indicators (check this first to avoid CS conflicts)
+            var businessIndicators = new[] { "management", "business", "marketing", "finance", "accounting", "economics", "strategy", "leadership", "organization", "operations", "human resources", "hr", "project management", "supply chain", "logistics", "entrepreneurship", "corporate", "company", "profit", "revenue", "cost", "budget", "investment", "stakeholder", "customer", "client", "market", "competition", "competitive", "swot", "analysis", "planning", "decision", "policy", "procedure", "process", "efficiency", "productivity", "quality", "performance", "kpi", "metrics", "roi", "return on investment" };
+            subjectScores["Business/Management"] = CountOccurrences(lowerContent, businessIndicators);
+
+            // Computer Science indicators (more specific to avoid conflicts)
+            var csIndicators = new[] { "algorithm", "programming", "code", "software", "database design", "network protocol", "security", "artificial intelligence", "machine learning", "data structure", "programming function", "variable declaration", "loop", "array", "object-oriented", "class definition", "method implementation", "compiler", "debugging", "syntax", "api", "framework", "library", "repository", "version control", "git", "deployment", "server", "client-server" };
             subjectScores["Computer Science"] = CountOccurrences(lowerContent, csIndicators);
 
             // Return the subject with the highest score

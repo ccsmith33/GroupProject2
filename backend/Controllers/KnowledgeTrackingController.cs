@@ -105,7 +105,7 @@ namespace StudentStudyAI.Controllers
                 
                 if (preferences == null)
                 {
-                    return NotFound("Learning preferences not found");
+                    return Ok(new { success = true, data = new { message = "No learning preferences found for this user" } });
                 }
 
                 return Ok(new { success = true, data = preferences });

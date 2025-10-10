@@ -798,35 +798,53 @@
         uploadBtn.style.display = "none";
         uploadLoading.style.display = "inline-block";
 
-        const formData = new FormData();
+        let successCount = 0;
+        let errorCount = 0;
+
         for (let file of filesToUpload) {
-          formData.append("files", file);
-        }
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("userId", "1");
+          formData.append("subject", "Advanced UI Test");
+          formData.append("studentLevel", "college");
 
-        try {
-          const response = await fetch(`${API_BASE}/files/upload`, {
-            method: "POST",
-            body: formData,
-          });
+          try {
+            const response = await fetch(`${API_BASE}/files/upload`, {
+              method: "POST",
+              body: formData,
+            });
 
-          const result = await response.json();
+            const result = await response.json();
 
-          if (response.ok) {
-            showNotification(
-              `Successfully uploaded ${result.data.length} files!`,
-              "success"
-            );
-            await loadFiles();
-            await loadAnalytics();
-          } else {
-            showNotification(`Upload failed: ${result.message}`, "error");
+            if (response.ok) {
+              successCount++;
+            } else {
+              errorCount++;
+              console.error(
+                `Upload failed for ${file.name}: ${result.message}`
+              );
+            }
+          } catch (error) {
+            errorCount++;
+            console.error(`Upload error for ${file.name}: ${error.message}`);
           }
-        } catch (error) {
-          showNotification(`Upload error: ${error.message}`, "error");
-        } finally {
-          uploadBtn.style.display = "inline";
-          uploadLoading.style.display = "none";
         }
+
+        if (successCount > 0) {
+          showNotification(
+            `Successfully uploaded ${successCount} files!${
+              errorCount > 0 ? ` (${errorCount} failed)` : ""
+            }`,
+            successCount === filesToUpload.length ? "success" : "warning"
+          );
+          await loadFiles();
+          await loadAnalytics();
+        } else {
+          showNotification(`Upload failed for all files`, "error");
+        }
+
+        uploadBtn.style.display = "inline";
+        uploadLoading.style.display = "none";
       }
 
       // File management
@@ -835,10 +853,16 @@
           const response = await fetch(`${API_BASE}/files/1/grouped`);
           const result = await response.json();
 
+          console.log("🔍 Load Files Response:", result);
+          console.log("🔍 Response data:", result.data);
+          console.log("🔍 filesBySubject:", result.data?.filesBySubject);
+          console.log("🔍 ungroupedFiles:", result.data?.ungroupedFiles);
+
           if (response.ok) {
-            currentFiles = Object.values(result.data.filesBySubject)
+            currentFiles = Object.values(result.data.filesBySubject || {})
               .flat()
-              .concat(result.data.ungroupedFiles);
+              .concat(result.data.ungroupedFiles || []);
+            console.log("🔍 Current files:", currentFiles);
             displayFiles(currentFiles);
           } else {
             showNotification("Failed to load files", "error");
@@ -918,12 +942,20 @@
       // Group management
       async function loadGroups() {
         try {
-          const response = await fetch(`${API_BASE}/files/groups?userId=1`);
-          const result = await response.json();
+          // Get both custom groups and auto-grouped files
+          const [groupsResponse, filesResponse] = await Promise.all([
+            fetch(`${API_BASE}/files/groups?userId=1`),
+            fetch(`${API_BASE}/files/1/grouped`),
+          ]);
 
-          if (response.ok) {
-            currentGroups = result.data;
-            displayGroups(currentGroups);
+          const groupsResult = await groupsResponse.json();
+          const filesResult = await filesResponse.json();
+
+          if (groupsResponse.ok && filesResponse.ok) {
+            const customGroups = groupsResult.data || [];
+            const autoGroupedFiles = filesResult.data.filesBySubject || {};
+
+            displayGroups(customGroups, autoGroupedFiles);
           } else {
             showNotification("Failed to load groups", "error");
           }
@@ -932,23 +964,44 @@
         }
       }
 
-      function displayGroups(groups) {
+      function displayGroups(customGroups, autoGroupedFiles) {
         const groupsList = document.getElementById("groupsList");
 
-        if (groups.length === 0) {
-          groupsList.innerHTML =
-            '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No groups created yet</div>';
-          return;
+        let html = "";
+
+        // Show auto-grouped files by subject
+        if (Object.keys(autoGroupedFiles).length > 0) {
+          html +=
+            '<h4 style="margin-bottom: 15px; color: #2c3e50;">📚 Auto-Grouped by Subject</h4>';
+
+          Object.entries(autoGroupedFiles).forEach(([subject, files]) => {
+            html += `
+              <div class="file-item" style="margin-bottom: 10px;">
+                <div class="file-info">
+                  <div class="file-icon" style="background: #3498db; color: white; font-size: 20px;">📚</div>
+                  <div class="file-details">
+                    <h4>${subject}</h4>
+                    <p>${files.length} file${files.length !== 1 ? "s" : ""}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
         }
 
-        groupsList.innerHTML = groups
-          .map(
-            (group) => `
-                <div class="file-item">
-                    <div class="file-info">
-                        <div class="file-icon" style="background: ${
-                          group.color
-                        };">📁</div>
+        // Show custom groups
+        if (customGroups.length > 0) {
+          html +=
+            '<h4 style="margin: 20px 0 15px 0; color: #2c3e50;">👥 Custom Groups</h4>';
+
+          html += customGroups
+            .map(
+              (group) => `
+                  <div class="file-item">
+                      <div class="file-info">
+                          <div class="file-icon" style="background: ${
+                            group.color
+                          };">📁</div>
                         <div class="file-details">
                             <h4>${group.groupName}</h4>
                             <p>${group.description || "No description"}</p>
@@ -964,8 +1017,20 @@
                     </div>
                 </div>
             `
-          )
-          .join("");
+            )
+            .join("");
+        }
+
+        // Show message if no groups at all
+        if (
+          Object.keys(autoGroupedFiles).length === 0 &&
+          customGroups.length === 0
+        ) {
+          html =
+            '<div style="text-align: center; padding: 40px; color: #7f8c8d;">No groups created yet. Upload files to see auto-grouping by subject.</div>';
+        }
+
+        groupsList.innerHTML = html;
       }
 
       async function createGroup() {
@@ -1037,13 +1102,24 @@
           const result = await response.json();
 
           if (response.ok) {
-            showNotification("Quiz generated successfully!", "success");
-            displayQuizPreview(result.data);
+            console.log("Quiz generation response:", result);
+            // Handle both wrapped and direct response formats
+            const quizData = result.data || result;
+            if (quizData && quizData.id) {
+              showNotification("Quiz generated successfully!", "success");
+              displayQuizPreview(quizData);
+            } else {
+              showNotification("Quiz generated but no valid quiz data returned", "error");
+              console.error("No valid quiz data in response:", result);
+            }
           } else {
             showNotification(
-              `Quiz generation failed: ${result.message}`,
+              `Quiz generation failed: ${
+                result.message || result.detail || "Unknown error"
+              }`,
               "error"
             );
+            console.error("Quiz generation error:", result);
           }
         } catch (error) {
           showNotification(`Error generating quiz: ${error.message}`, "error");
@@ -1058,7 +1134,20 @@
         const quizStats = document.getElementById("quizStats");
         const quizQuestions = document.getElementById("quizQuestions");
 
-        const questions = JSON.parse(quiz.questions || "[]");
+        // Add error handling for quiz object
+        if (!quiz) {
+          showNotification("Quiz data is invalid", "error");
+          return;
+        }
+
+        let questions = [];
+        try {
+          questions = JSON.parse(quiz.questions || "[]");
+        } catch (error) {
+          console.error("Error parsing quiz questions:", error);
+          showNotification("Error parsing quiz questions", "error");
+          return;
+        }
 
         quizStats.innerHTML = `
                 <div class="stat-card">
@@ -1117,17 +1206,32 @@
             currentAnalytics = result.data;
             displayAnalytics(currentAnalytics);
           } else {
-            showNotification("Failed to load analytics", "error");
+            // Don't show error for analytics - it's expected when no data exists yet
+            showNotification(
+              "No analytics data available yet - upload and process some files first!",
+              "info"
+            );
+            currentAnalytics = null;
           }
         } catch (error) {
           showNotification(
-            `Error loading analytics: ${error.message}`,
-            "error"
+            "Analytics not available yet - upload and process some files first!",
+            "info"
           );
+          currentAnalytics = null;
         }
       }
 
       function displayAnalytics(analytics) {
+        if (!analytics) {
+          // Show default values when no analytics data
+          document.getElementById("totalFiles").textContent =
+            currentFiles.length;
+          document.getElementById("totalQuizzes").textContent = "0";
+          document.getElementById("avgScore").textContent = "0%";
+          return;
+        }
+
         document.getElementById("totalFiles").textContent = currentFiles.length;
         document.getElementById("totalQuizzes").textContent =
           analytics.recentPerformance?.length || 0;
@@ -1282,9 +1386,24 @@
         showNotification("File editing feature coming soon!", "info");
       }
 
-      function deleteFile(fileId) {
+      async function deleteFile(fileId) {
         if (confirm("Are you sure you want to delete this file?")) {
-          showNotification("File deletion feature coming soon!", "info");
+          try {
+            const response = await fetch(`${API_BASE}/files/${fileId}`, {
+              method: "DELETE",
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              showNotification("File moved to trash!", "success");
+              await loadFiles(); // Refresh the file list
+            } else {
+              showNotification(`Delete failed: ${result.message}`, "error");
+            }
+          } catch (error) {
+            showNotification(`Error deleting file: ${error.message}`, "error");
+          }
         }
       }
 

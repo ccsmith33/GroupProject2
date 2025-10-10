@@ -18,7 +18,7 @@ namespace StudentStudyAI.Services
             _logger = logger;
             _jobQueue = new ConcurrentQueue<BackgroundJob>();
             _semaphore = new SemaphoreSlim(_maxConcurrentJobs, _maxConcurrentJobs);
-            _timer = new Timer(ProcessJobs, null, TimeSpan.Zero, TimeSpan.FromSeconds(5));
+            _timer = new Timer(ProcessJobs, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -40,17 +40,29 @@ namespace StudentStudyAI.Services
             _logger.LogInformation("Job enqueued: {JobType} - {JobId}", job.JobType, job.JobId);
         }
 
-        private async void ProcessJobs(object? state)
+        private void ProcessJobs(object? state)
         {
             if (_jobQueue.IsEmpty)
+            {
                 return;
+            }
 
-            await _semaphore.WaitAsync();
+            _semaphore.Wait();
             try
             {
                 if (_jobQueue.TryDequeue(out var job))
                 {
-                    _ = Task.Run(async () => await ExecuteJobAsync(job));
+                    _ = Task.Run(async () => 
+                    {
+                        try
+                        {
+                            await ExecuteJobAsync(job);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error executing job {JobId}: {ErrorMessage}", job.JobId, ex.Message);
+                        }
+                    });
                 }
             }
             finally
@@ -63,8 +75,6 @@ namespace StudentStudyAI.Services
         {
             try
             {
-                _logger.LogInformation("Executing job: {JobType} - {JobId}", job.JobType, job.JobId);
-                
                 using var scope = _serviceProvider.CreateScope();
                 
                 switch (job.JobType)
@@ -83,7 +93,6 @@ namespace StudentStudyAI.Services
                         break;
                 }
 
-                _logger.LogInformation("Job completed successfully: {JobType} - {JobId}", job.JobType, job.JobId);
             }
             catch (Exception ex)
             {
@@ -103,47 +112,68 @@ namespace StudentStudyAI.Services
 
         private async Task ProcessFileJobAsync(IServiceScope scope, BackgroundJob job)
         {
-            var fileProcessingService = scope.ServiceProvider.GetRequiredService<FileProcessingService>();
-            var databaseService = scope.ServiceProvider.GetRequiredService<DatabaseService>();
-            var contextService = scope.ServiceProvider.GetRequiredService<ContextService>();
-
-            if (job.Data.TryGetValue("fileId", out var fileIdObj) && int.TryParse(fileIdObj.ToString(), out var fileId))
+            try
             {
-                var file = await databaseService.GetFileUploadAsync(fileId);
-                if (file != null)
+                var fileProcessingService = scope.ServiceProvider.GetRequiredService<IFileProcessingService>();
+                var databaseService = scope.ServiceProvider.GetRequiredService<IDatabaseService>();
+                var contextService = scope.ServiceProvider.GetRequiredService<ContextService>();
+
+                if (job.Data.TryGetValue("fileId", out var fileIdObj) && int.TryParse(fileIdObj.ToString(), out var fileId))
                 {
-                    var processedFile = await fileProcessingService.ProcessFileAsync(file);
-                    await databaseService.UpdateFileProcessingStatusAsync(fileId, processedFile.Status, processedFile.ExtractedText);
-                    
-                    // Run auto-detection if file was processed successfully
-                    if (processedFile.Status == "completed" && !string.IsNullOrEmpty(processedFile.ExtractedText))
+                    var file = await databaseService.GetFileUploadAsync(fileId);
+                    if (file != null)
                     {
-                        try
+                        var processedFile = await fileProcessingService.ProcessFileAsync(file);
+                        await databaseService.UpdateFileProcessingStatusAsync(fileId, processedFile.Status, processedFile.ExtractedText);
+                        
+                        // Run auto-detection if file was processed successfully
+                        if (processedFile.Status == "completed" && !string.IsNullOrEmpty(processedFile.ExtractedText))
                         {
-                            // Create a temporary file object with extracted content for detection
-                            var tempFile = new FileUpload
+                            try
                             {
-                                Id = fileId,
-                                ExtractedContent = processedFile.ExtractedText,
-                                FileName = file.FileName
-                            };
-                            
-                            // Detect subject and topic from content
-                            var detectedSubject = contextService.DetectSubjectFromContent(processedFile.ExtractedText);
-                            var detectedTopic = contextService.DetectTopicFromContent(processedFile.ExtractedText);
-                            
-                            // Update the file with detected subject and topic
-                            await databaseService.UpdateFileAutoDetectionAsync(fileId, detectedSubject, detectedTopic);
-                            
-                            _logger.LogInformation("Auto-detected subject '{Subject}' and topic '{Topic}' for file {FileId}", 
-                                detectedSubject, detectedTopic, fileId);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error during auto-detection for file {FileId}", fileId);
+                                // Use AI analysis for better subject/topic detection
+                                var openAIService = scope.ServiceProvider.GetRequiredService<OpenAIService>();
+                                var fileAnalysis = await openAIService.AnalyzeFileContentAsync(file, null, null);
+                                
+                                // Update database with AI-detected subject and topic
+                                await databaseService.UpdateFileAutoDetectionAsync(fileId, fileAnalysis.Subject, fileAnalysis.Topic);
+                                
+                                _logger.LogInformation("AI analysis completed for file {FileId}: Subject='{Subject}', Topic='{Topic}'", 
+                                    fileId, fileAnalysis.Subject, fileAnalysis.Topic);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error during AI analysis for file {FileId}: {ErrorMessage}", fileId, ex.Message);
+                                
+                                // Fallback to keyword detection if AI fails
+                                try
+                                {
+                                    var detectedSubject = contextService.DetectSubjectFromContent(processedFile.ExtractedText);
+                                    var detectedTopic = contextService.DetectTopicFromContent(processedFile.ExtractedText);
+                                    await databaseService.UpdateFileAutoDetectionAsync(fileId, detectedSubject, detectedTopic);
+                                    _logger.LogInformation("Fallback keyword detection completed for file {FileId}: Subject='{Subject}', Topic='{Topic}'", 
+                                        fileId, detectedSubject, detectedTopic);
+                                }
+                                catch (Exception fallbackEx)
+                                {
+                                    _logger.LogError(fallbackEx, "Both AI analysis and keyword detection failed for file {FileId}", fileId);
+                                }
+                            }
                         }
                     }
+                    else
+                    {
+                        _logger.LogError("File not found in database: {FileId}", fileId);
+                    }
                 }
+                else
+                {
+                    _logger.LogError("Invalid fileId in job data: {JobData}", string.Join(", ", job.Data.Select(kv => $"{kv.Key}={kv.Value}")));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Critical error in file processing job {JobId}: {ErrorMessage}", job.JobId, ex.Message);
             }
         }
 

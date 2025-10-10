@@ -341,6 +341,9 @@ namespace StudentStudyAI.Services
                     UserDefinedTopic VARCHAR(255),
                     IsUserModified BOOLEAN DEFAULT FALSE,
                     SubjectGroupId INT,
+                    -- Soft delete fields
+                    IsDeleted BOOLEAN DEFAULT FALSE,
+                    DeletedAt DATETIME,
                     FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
                 );
 
@@ -853,6 +856,189 @@ namespace StudentStudyAI.Services
             }
         }
 
+        private async Task EnsureQuizPerformanceTableExistsAsync()
+        {
+            using var connection = await GetConnectionAsync();
+            try
+            {
+                var checkTableCommand = new MySqlCommand("SHOW TABLES LIKE 'QuizPerformance'", connection);
+                var tableExists = await checkTableCommand.ExecuteScalarAsync();
+                
+                if (tableExists == null)
+                {
+                    _logger.LogWarning("QuizPerformance table does not exist, creating it...");
+                    
+                    var createTableCommand = new MySqlCommand(@"
+                        CREATE TABLE IF NOT EXISTS QuizPerformance (
+                            Id INT AUTO_INCREMENT PRIMARY KEY,
+                            UserId INT NOT NULL,
+                            QuizId INT NOT NULL,
+                            Score DECIMAL(5,2),
+                            KnowledgeLevel VARCHAR(50),
+                            Difficulty VARCHAR(20),
+                            TimeSpent INT,
+                            CompletedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE,
+                            FOREIGN KEY (QuizId) REFERENCES Quizzes(Id) ON DELETE CASCADE
+                        )", connection);
+                    
+                    await createTableCommand.ExecuteNonQueryAsync();
+                    _logger.LogInformation("QuizPerformance table created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring QuizPerformance table exists");
+                throw;
+            }
+        }
+
+        private async Task EnsureUserKnowledgeProfilesTableExistsAsync()
+        {
+            using var connection = await GetConnectionAsync();
+            try
+            {
+                var checkTableCommand = new MySqlCommand("SHOW TABLES LIKE 'UserKnowledgeProfiles'", connection);
+                var tableExists = await checkTableCommand.ExecuteScalarAsync();
+                
+                if (tableExists == null)
+                {
+                    _logger.LogWarning("UserKnowledgeProfiles table does not exist, creating it...");
+                    
+                    var createTableCommand = new MySqlCommand(@"
+                        CREATE TABLE IF NOT EXISTS UserKnowledgeProfiles (
+                            Id INT AUTO_INCREMENT PRIMARY KEY,
+                            UserId INT NOT NULL,
+                            Subject VARCHAR(100) NOT NULL,
+                            KnowledgeLevel VARCHAR(50),
+                            ConfidenceScore DECIMAL(5,2),
+                            LastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            IsActive BOOLEAN DEFAULT TRUE,
+                            FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+                        )", connection);
+                    
+                    await createTableCommand.ExecuteNonQueryAsync();
+                    _logger.LogInformation("UserKnowledgeProfiles table created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring UserKnowledgeProfiles table exists");
+                throw;
+            }
+        }
+
+        private async Task EnsureKnowledgeProgressionTableExistsAsync()
+        {
+            using var connection = await GetConnectionAsync();
+            try
+            {
+                var checkTableCommand = new MySqlCommand("SHOW TABLES LIKE 'KnowledgeProgression'", connection);
+                var tableExists = await checkTableCommand.ExecuteScalarAsync();
+                
+                if (tableExists == null)
+                {
+                    _logger.LogWarning("KnowledgeProgression table does not exist, creating it...");
+                    
+                    var createTableCommand = new MySqlCommand(@"
+                        CREATE TABLE IF NOT EXISTS KnowledgeProgression (
+                            Id INT AUTO_INCREMENT PRIMARY KEY,
+                            UserId INT NOT NULL,
+                            Subject VARCHAR(100) NOT NULL,
+                            PreviousLevel VARCHAR(50),
+                            NewLevel VARCHAR(50),
+                            ChangeReason VARCHAR(255),
+                            ChangedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+                        )", connection);
+                    
+                    await createTableCommand.ExecuteNonQueryAsync();
+                    _logger.LogInformation("KnowledgeProgression table created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring KnowledgeProgression table exists");
+                throw;
+            }
+        }
+
+        private async Task EnsureUserLearningPreferencesTableExistsAsync()
+        {
+            using var connection = await GetConnectionAsync();
+            try
+            {
+                var checkTableCommand = new MySqlCommand("SHOW TABLES LIKE 'UserLearningPreferences'", connection);
+                var tableExists = await checkTableCommand.ExecuteScalarAsync();
+                
+                if (tableExists == null)
+                {
+                    _logger.LogWarning("UserLearningPreferences table does not exist, creating it...");
+                    
+                    var createTableCommand = new MySqlCommand(@"
+                        CREATE TABLE IF NOT EXISTS UserLearningPreferences (
+                            Id INT AUTO_INCREMENT PRIMARY KEY,
+                            UserId INT NOT NULL,
+                            PreferredQuizLength VARCHAR(50) DEFAULT 'standard',
+                            CustomQuestionMultiplier DECIMAL(3,2) DEFAULT 1.0,
+                            PreferredDifficulty VARCHAR(50) DEFAULT 'adaptive',
+                            TimeAvailable INT DEFAULT 30,
+                            StudyStyle VARCHAR(50) DEFAULT 'balanced',
+                            CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                            FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
+                        )", connection);
+                    
+                    await createTableCommand.ExecuteNonQueryAsync();
+                    _logger.LogInformation("UserLearningPreferences table created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring UserLearningPreferences table exists");
+                throw;
+            }
+        }
+
+        private async Task EnsureContentDifficultyAnalysisTableExistsAsync()
+        {
+            using var connection = await GetConnectionAsync();
+            try
+            {
+                var checkTableCommand = new MySqlCommand("SHOW TABLES LIKE 'ContentDifficultyAnalysis'", connection);
+                var tableExists = await checkTableCommand.ExecuteScalarAsync();
+                
+                if (tableExists == null)
+                {
+                    _logger.LogWarning("ContentDifficultyAnalysis table does not exist, creating it...");
+                    
+                    var createTableCommand = new MySqlCommand(@"
+                        CREATE TABLE IF NOT EXISTS ContentDifficultyAnalysis (
+                            Id INT AUTO_INCREMENT PRIMARY KEY,
+                            FileId INT NOT NULL,
+                            ComplexityScore DECIMAL(3,2),
+                            KnowledgeLevel INT,
+                            UniqueConcepts INT,
+                            ContentVolume INT,
+                            EstimatedQuestions INT,
+                            TimeEstimate INT,
+                            AnalyzedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (FileId) REFERENCES FileUploads(Id) ON DELETE CASCADE
+                        )", connection);
+                    
+                    await createTableCommand.ExecuteNonQueryAsync();
+                    _logger.LogInformation("ContentDifficultyAnalysis table created successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ensuring ContentDifficultyAnalysis table exists");
+                throw;
+            }
+        }
+
         private async Task EnsureQuizAttemptsTableExistsAsync(MySqlConnection connection)
         {
             try
@@ -1151,7 +1337,7 @@ namespace StudentStudyAI.Services
         {
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
-                "SELECT * FROM FileUploads WHERE UserId = @userId ORDER BY UploadedAt DESC", connection);
+                "SELECT * FROM FileUploads WHERE UserId = @userId AND IsDeleted = FALSE ORDER BY UploadedAt DESC", connection);
             command.Parameters.AddWithValue("@userId", userId);
 
             var files = new List<FileUpload>();
@@ -1178,7 +1364,15 @@ namespace StudentStudyAI.Services
                     TokenCount = reader.GetInt32("TokenCount"),
                     Subject = reader.IsDBNull("Subject") ? null : reader.GetString("Subject"),
                     Topic = reader.IsDBNull("Topic") ? null : reader.GetString("Topic"),
-                    ContextTags = reader.IsDBNull("ContextTags") ? "[]" : reader.GetString("ContextTags")
+                    ContextTags = reader.IsDBNull("ContextTags") ? "[]" : reader.GetString("ContextTags"),
+                    AutoDetectedSubject = reader.IsDBNull("AutoDetectedSubject") ? null : reader.GetString("AutoDetectedSubject"),
+                    AutoDetectedTopic = reader.IsDBNull("AutoDetectedTopic") ? null : reader.GetString("AutoDetectedTopic"),
+                    UserDefinedSubject = reader.IsDBNull("UserDefinedSubject") ? null : reader.GetString("UserDefinedSubject"),
+                    UserDefinedTopic = reader.IsDBNull("UserDefinedTopic") ? null : reader.GetString("UserDefinedTopic"),
+                    IsUserModified = reader.GetBoolean("IsUserModified"),
+                    SubjectGroupId = reader.IsDBNull("SubjectGroupId") ? null : reader.GetInt32("SubjectGroupId"),
+                    IsDeleted = reader.GetBoolean("IsDeleted"),
+                    DeletedAt = reader.IsDBNull("DeletedAt") ? null : reader.GetDateTime("DeletedAt")
                 });
             }
             return files;
@@ -1601,6 +1795,7 @@ namespace StudentStudyAI.Services
 
         public async Task<UserKnowledgeProfile?> GetUserKnowledgeProfileAsync(int userId, string subject)
         {
+            await EnsureUserKnowledgeProfilesTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
                 "SELECT Id, UserId, Subject, KnowledgeLevel, ConfidenceScore, LastUpdated, CreatedAt, IsActive " +
@@ -1655,24 +1850,6 @@ namespace StudentStudyAI.Services
             return profiles;
         }
 
-        private async Task EnsureUserKnowledgeProfilesTableExistsAsync()
-        {
-            using var connection = await GetConnectionAsync();
-            var sql = @"CREATE TABLE IF NOT EXISTS UserKnowledgeProfiles (
-                Id INT AUTO_INCREMENT PRIMARY KEY,
-                UserId INT NOT NULL,
-                Subject VARCHAR(255) NOT NULL,
-                KnowledgeLevel INT NOT NULL,
-                ConfidenceScore DECIMAL(5,2) NOT NULL DEFAULT 0,
-                LastUpdated DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                IsActive BOOLEAN NOT NULL DEFAULT TRUE,
-                Notes TEXT,
-                FOREIGN KEY (UserId) REFERENCES Users(Id) ON DELETE CASCADE
-            );";
-            var command = new MySqlCommand(sql, connection);
-            await command.ExecuteNonQueryAsync();
-        }
 
         public async Task<bool> UpdateUserKnowledgeProfileAsync(UserKnowledgeProfile profile)
         {
@@ -1713,6 +1890,7 @@ namespace StudentStudyAI.Services
 
         public async Task<List<QuizPerformance>> GetRecentQuizPerformanceAsync(int userId, int count = 10)
         {
+            await EnsureQuizPerformanceTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
                 "SELECT Id, UserId, QuizId, Score, KnowledgeLevel, Difficulty, TimeSpent, CompletedAt, CreatedAt " +
@@ -1763,11 +1941,12 @@ namespace StudentStudyAI.Services
 
         public async Task<List<KnowledgeProgression>> GetKnowledgeProgressionAsync(int userId)
         {
+            await EnsureKnowledgeProgressionTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
-                "SELECT Id, UserId, Subject, PreviousLevel, NewLevel, ChangeReason, ConfidenceScore, CreatedAt " +
+                "SELECT Id, UserId, Subject, PreviousLevel, NewLevel, ChangeReason, ConfidenceScore, ChangedAt " +
                 "FROM KnowledgeProgression WHERE UserId = @userId " +
-                "ORDER BY CreatedAt DESC", connection);
+                "ORDER BY ChangedAt DESC", connection);
             command.Parameters.AddWithValue("@userId", userId);
 
             var progressions = new List<KnowledgeProgression>();
@@ -1783,7 +1962,7 @@ namespace StudentStudyAI.Services
                     NewLevel = reader.GetInt32("NewLevel"),
                     ChangeReason = reader.GetString("ChangeReason"),
                     ConfidenceScore = reader.IsDBNull("ConfidenceScore") ? null : reader.GetDecimal("ConfidenceScore"),
-                    CreatedAt = reader.GetDateTime("CreatedAt")
+                    CreatedAt = reader.GetDateTime("ChangedAt")
                 });
             }
             return progressions;
@@ -1791,6 +1970,7 @@ namespace StudentStudyAI.Services
 
         public async Task<UserLearningPreferences?> GetUserLearningPreferencesAsync(int userId)
         {
+            await EnsureUserLearningPreferencesTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
                 "SELECT Id, UserId, PreferredQuizLength, CustomQuestionMultiplier, PreferredDifficulty, TimeAvailable, StudyStyle, CreatedAt, UpdatedAt " +
@@ -1859,6 +2039,7 @@ namespace StudentStudyAI.Services
 
         public async Task<int> CreateContentDifficultyAnalysisAsync(ContentDifficultyAnalysis analysis)
         {
+            await EnsureContentDifficultyAnalysisTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
                 "INSERT INTO ContentDifficultyAnalysis (FileId, ComplexityScore, KnowledgeLevel, UniqueConcepts, ContentVolume, EstimatedQuestions, TimeEstimate, AnalyzedAt) " +
@@ -1947,11 +2128,12 @@ namespace StudentStudyAI.Services
 
         public async Task<List<KnowledgeProgression>> GetKnowledgeProgressionAsync(int userId, string? subject = null)
         {
+            await EnsureKnowledgeProgressionTableExistsAsync();
             using var connection = await GetConnectionAsync();
             var command = new MySqlCommand(
                 "SELECT * FROM KnowledgeProgression WHERE UserId = @userId " +
                 (subject != null ? "AND Subject = @subject " : "") +
-                "ORDER BY CreatedAt DESC", connection);
+                "ORDER BY ChangedAt DESC", connection);
             command.Parameters.AddWithValue("@userId", userId);
             if (subject != null)
             {
@@ -1971,7 +2153,7 @@ namespace StudentStudyAI.Services
                     NewLevel = reader.GetInt32("NewLevel"),
                     ChangeReason = reader.GetString("ChangeReason"),
                     ConfidenceScore = reader.IsDBNull("ConfidenceScore") ? null : reader.GetDecimal("ConfidenceScore"),
-                    CreatedAt = reader.GetDateTime("CreatedAt")
+                    CreatedAt = reader.GetDateTime("ChangedAt")
                 });
             }
             return progressions;

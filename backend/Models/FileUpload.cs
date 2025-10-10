@@ -40,5 +40,9 @@ namespace StudentStudyAI.Models
         public string? UserDefinedTopic { get; set; }
         public bool IsUserModified { get; set; } = false;
         public int? SubjectGroupId { get; set; }
+
+        // Soft delete fields
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }
